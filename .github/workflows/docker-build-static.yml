@@ -79,7 +79,7 @@ jobs:
           restore-keys: |
             lldap-ui-
       - name: Checkout repository
-        uses: actions/checkout@v3.2.0
+        uses: actions/checkout@v3.3.0
       - name: install rollup nodejs
         run: npm install -g rollup
       - name: add wasm target
@@ -117,7 +117,7 @@ jobs:
       - name: add armhf target
         run: rustup target add armv7-unknown-linux-gnueabihf
       - name: Checkout repository
-        uses: actions/checkout@v3.2.0
+        uses: actions/checkout@v3.3.0
       - uses: actions/cache@v3
         with:
           path: |
@@ -162,7 +162,7 @@ jobs:
         CARGO_HOME: ${GITHUB_WORKSPACE}/.cargo
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3.2.0
+        uses: actions/checkout@v3.3.0
       - uses: actions/cache@v3
         with:
           path: |
@@ -208,7 +208,7 @@ jobs:
         CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER: x86_64-linux-musl-gcc
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3.2.0
+        uses: actions/checkout@v3.3.0
       - uses: actions/cache@v3
         with:
           path: |
@@ -256,7 +256,7 @@ jobs:
       - name: install rsync
         run: sudo apt update && sudo apt install -y rsync
       - name: fetch repo
-        uses: actions/checkout@v3.2.0
+        uses: actions/checkout@v3.3.0
 
       - name: Download armhf lldap artifacts
         uses: actions/download-artifact@v3
