@@ -55,18 +55,10 @@ jobs:
   build-ui:
     runs-on: ubuntu-latest
     container:
-#      image: rust:1.65
       image: nitnelave/rust-dev:latest
-      env:
-        CARGO_TERM_COLOR: always
-        RUSTFLAGS: -Ctarget-feature=+crt-static
     steps:
-#      - name: install runtime
-#        run: apt update && apt install -y gcc-x86-64-linux-gnu g++-x86-64-linux-gnu libc6-dev ca-certificates
-#      - name: setup node repo LTS
-#        run: curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
-#      - name: install nodejs
-#        run: apt install -y nodejs && npm -g install npm
+      - name: Checkout repository
+        uses: actions/checkout@v3.3.0
       - uses: actions/cache@v3
         with:
           path: |
@@ -78,8 +70,6 @@ jobs:
           key: lldap-ui-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             lldap-ui-
-      - name: Checkout repository
-        uses: actions/checkout@v3.3.0
       - name: install rollup nodejs
         run: npm install -g rollup
       - name: add wasm target
@@ -153,7 +143,6 @@ jobs:
 # Using lldap dev image based on rust:1.65-slim-bullseye and musl-gcc bundled    #
 # Only for Job build aarch64 and amd64                                           #
 ###################################################################################
-      #image: rust:1.65
       image: nitnelave/rust-dev:latest
       env:
         CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: aarch64-linux-musl-gcc
@@ -199,7 +188,6 @@ jobs:
   build-amd64:
     runs-on: ubuntu-latest
     container:
-#      image: rust:1.65
       image: nitnelave/rust-dev:latest
       env:
         CARGO_TERM_COLOR: always
@@ -338,9 +326,9 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-######################
-#### latest build ####
-######################
+########################################
+#### docker image :latest tag build ####
+########################################
       - name: Build and push latest alpine
         if: github.event_name != 'release'
         uses: docker/build-push-action@v3
@@ -365,9 +353,9 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
 
-#######################
-#### release build ####
-#######################
+########################################
+#### docker image :semver tag build ####
+########################################
       - name: Build and push release alpine
         if: github.event_name == 'release'
         uses: docker/build-push-action@v3
@@ -405,52 +393,60 @@ jobs:
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
           repository: nitnelave/lldap
 
-
+###############################################################
+### Download artifacts, clean up ui, upload to release page ###
+###############################################################
   create-release-artifacts:
      needs: [build-ui,build-armhf,build-aarch64,build-amd64]
      name: Create release artifacts
      if: github.event_name == 'release'
      runs-on: ubuntu-latest
      steps:
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: bin/
+      - name: Check file
+        run: ls -R bin/
 
-      - name: Download armhf lldap artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: armhf-lldap-bin
-          path: bin/armhf-bin
-      - name: Download armhf migration-tool artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: armhf-migration-tool-bin
-          path: bin/armhf-bin
-      - name: Fix binary name armhf
-        run: mv bin/armhf-bin/lldap bin/armhf-bin/lldap-armhf && mv bin/armhf-bin/migration-tool bin/armhf-bin/migration-tool-armhf
-
-      - name: Download aarch64 lldap artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: aarch64-lldap-bin
-          path: bin/aarch64-bin
-      - name: Download aarch64 migration-tool artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: aarch64-migration-tool-bin
-          path: bin/aarch64-bin
-      - name: Fix binary name aarch64
-        run: mv bin/aarch64-bin/lldap bin/aarch64-bin/lldap-aarch64 && mv bin/aarch64-bin/migration-tool bin/aarch64-bin/migration-tool-aarch64
-
-      - name: Download amd64 lldap artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: amd64-lldap-bin
-          path: bin/amd64-bin
-      - name: Download amd64 migration-tool artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: amd64-migration-tool-bin
-          path: bin/amd64-bin
-      - name: Fix binary name amd64
-        run: mv bin/amd64-bin/lldap bin/amd64-bin/lldap-amd64 && mv bin/amd64-bin/migration-tool bin/amd64-bin/migration-tool-amd64
+#      - name: Download armhf lldap artifacts
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: armhf-lldap-bin
+#          path: bin/armhf-bin
+#      - name: Download armhf migration-tool artifacts
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: armhf-migration-tool-bin
+#          path: bin/armhf-bin
+#      - name: Fix binary name armhf
+#        run: mv bin/armhf-bin/lldap bin/armhf-bin/lldap-armhf && mv bin/armhf-bin/migration-tool bin/armhf-bin/migration-tool-armhf
+#
+#      - name: Download aarch64 lldap artifacts
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: aarch64-lldap-bin
+#          path: bin/aarch64-bin
+#      - name: Download aarch64 migration-tool artifacts
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: aarch64-migration-tool-bin
+#          path: bin/aarch64-bin
+#      - name: Fix binary name aarch64
+#        run: mv bin/aarch64-bin/lldap bin/aarch64-bin/lldap-aarch64 && mv bin/aarch64-bin/migration-tool bin/aarch64-bin/migration-tool-aarch64
+#
+#      - name: Download amd64 lldap artifacts
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: amd64-lldap-bin
+#          path: bin/amd64-bin
+#      - name: Download amd64 migration-tool artifacts
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: amd64-migration-tool-bin
+#          path: bin/amd64-bin
+#      - name: Fix binary name amd64
+#        run: mv bin/amd64-bin/lldap bin/amd64-bin/lldap-amd64 && mv bin/amd64-bin/migration-tool bin/amd64-bin/migration-tool-amd64
 
       - name: Download llap ui artifacts
         uses: actions/download-artifact@v3
@@ -475,12 +471,12 @@ jobs:
         id: create_release
         with:
           allowUpdates: true
-          artifacts:  bin/armhf-bin/lldap-armhf,
-                      bin/aarch64-bin/lldap-aarch64,
-                      bin/amd64-bin/lldap-amd64,
-                      bin/armhf-bin/migration-tool-armhf,
-                      bin/aarch64-bin/migration-tool-aarch64,
-                      bin/amd64-bin/migration-tool-amd64,
+          artifacts:  bin/lldap-armhf,
+                      bin/lldap-aarch64,
+                      bin/lldap-amd64,
+                      bin/migration-tool-armhf,
+                      bin/migration-tool-aarch64,
+                      bin/migration-tool-amd64,
                       web.zip
         env:
          GITHUB_TOKEN: ${{ github.token }}
