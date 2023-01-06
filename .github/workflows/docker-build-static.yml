@@ -480,7 +480,7 @@ jobs:
         with:
           allowUpdates: true
           artifacts:  bin/aarch64-lldap,
-                      bin/amd64-llap,
+                      bin/amd64-lldap,
                       bin/armhf-lldap,
                       bin/aarch64-migration-tool,
                       bin/amd64-migration-tool,
