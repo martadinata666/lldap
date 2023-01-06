@@ -407,7 +407,7 @@ jobs:
         with:
           path: bin/
       - name: Check file
-        run: ls -R bin/
+        run: ls -alR bin/
 
 #      - name: Download armhf lldap artifacts
 #        uses: actions/download-artifact@v3
@@ -471,12 +471,12 @@ jobs:
         id: create_release
         with:
           allowUpdates: true
-          artifacts:  bin/lldap-armhf,
-                      bin/lldap-aarch64,
-                      bin/lldap-amd64,
-                      bin/migration-tool-armhf,
-                      bin/migration-tool-aarch64,
-                      bin/migration-tool-amd64,
+          artifacts:  bin/aarch64-lldap-bin,
+                      bin/amd64-llap-bin,
+                      bin/armhf-lldap-bin,
+                      bin/aarch64-migration-tool-bin,
+                      bin/amd64-migration-tool-bin,
+                      bin/armhf-migration-tool-bin,
                       web.zip
         env:
          GITHUB_TOKEN: ${{ github.token }}
