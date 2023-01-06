@@ -55,19 +55,18 @@ jobs:
   build-ui:
     runs-on: ubuntu-latest
     container:
-      image: rust:1.65
+#      image: rust:1.65
+      image: nitnelave/rust-dev:latest
       env:
         CARGO_TERM_COLOR: always
         RUSTFLAGS: -Ctarget-feature=+crt-static
     steps:
-      - name: install runtime
-        run: apt update && apt install -y gcc-x86-64-linux-gnu g++-x86-64-linux-gnu libc6-dev ca-certificates
-      - name: setup node repo LTS
-        run: curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
-      - name: install nodejs
-        run: apt install -y nodejs && npm -g install npm
-      - name: smoke test
-        run: rustc --version
+#      - name: install runtime
+#        run: apt update && apt install -y gcc-x86-64-linux-gnu g++-x86-64-linux-gnu libc6-dev ca-certificates
+#      - name: setup node repo LTS
+#        run: curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
+#      - name: install nodejs
+#        run: apt install -y nodejs && npm -g install npm
       - uses: actions/cache@v3
         with:
           path: |
@@ -80,9 +79,11 @@ jobs:
           restore-keys: |
             lldap-ui-
       - name: Checkout repository
-        uses: actions/checkout@v3.3.0
+        uses: actions/checkout@v3.2.0
       - name: install rollup nodejs
         run: npm install -g rollup
+      - name: add wasm target
+        run: rustup target add wasm32-unknown-unknown
       - name: install wasm-pack with cargo
         run: cargo install wasm-pack || true
         env:
@@ -100,7 +101,8 @@ jobs:
   build-armhf:
     runs-on: ubuntu-latest
     container:
-      image: rust:1.65
+#      image: rust:1.65
+      image: nitnelave/rust-dev:latest
       env:
         CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER: arm-linux-gnueabihf-gcc
         CARGO_TARGET_ARMV7_UNKNOWN_LINUX_MUSLEABIHF_LINKER: arm-linux-gnueabihf-ld
@@ -112,14 +114,10 @@ jobs:
         run: dpkg --add-architecture armhf
       - name: install runtime
         run: apt update && apt install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf libc6-armhf-cross libc6-dev-armhf-cross tar ca-certificates
-      - name: smoke test
-        run: rustc --version
       - name: add armhf target
         run: rustup target add armv7-unknown-linux-gnueabihf
-      - name: smoke test
-        run: rustc --version
       - name: Checkout repository
-        uses: actions/checkout@v3.3.0
+        uses: actions/checkout@v3.2.0
       - uses: actions/cache@v3
         with:
           path: |
@@ -164,11 +162,7 @@ jobs:
         CARGO_HOME: ${GITHUB_WORKSPACE}/.cargo
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3.3.0
-      - name: smoke test
-        run: rustc --version
-      - name: Checkout repository
-        uses: actions/checkout@v3.3.0
+        uses: actions/checkout@v3.2.0
       - uses: actions/cache@v3
         with:
           path: |
@@ -214,7 +208,7 @@ jobs:
         CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER: x86_64-linux-musl-gcc
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3.3.0
+        uses: actions/checkout@v3.2.0
       - uses: actions/cache@v3
         with:
           path: |
@@ -262,7 +256,7 @@ jobs:
       - name: install rsync
         run: sudo apt update && sudo apt install -y rsync
       - name: fetch repo
-        uses: actions/checkout@v3.3.0
+        uses: actions/checkout@v3.2.0
 
       - name: Download armhf lldap artifacts
         uses: actions/download-artifact@v3
@@ -326,7 +320,7 @@ jobs:
             type=semver,pattern={{major}}
             type=sha
       - name: Cache Docker layers
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
