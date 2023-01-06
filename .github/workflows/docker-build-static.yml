@@ -408,6 +408,14 @@ jobs:
           path: bin/
       - name: Check file
         run: ls -alR bin/
+      - name: Fixing Filename
+        run: |
+             mv bin/aarch64-lldap-bin/lldap bin/aarch64-lldap
+             mv bin/amd64-lldap-bin/lldap bin/amd64-lldap
+             mv bin/armhf-lldap-bin/lldap bin/armhf-lldap
+             mv bin/aarch64-migration-tool-bin/migration-tool bin/aarch64-migration-tool
+             mv bin/amd64-migration-tool-bin/migration-tool bin/amd64-migration-tool
+             mv bin/armhf-migration-tool-bin/migration-tool bin/armhf-migration-tool
 
 #      - name: Download armhf lldap artifacts
 #        uses: actions/download-artifact@v3
@@ -471,12 +479,12 @@ jobs:
         id: create_release
         with:
           allowUpdates: true
-          artifacts:  bin/aarch64-lldap-bin,
-                      bin/amd64-llap-bin,
-                      bin/armhf-lldap-bin,
-                      bin/aarch64-migration-tool-bin,
-                      bin/amd64-migration-tool-bin,
-                      bin/armhf-migration-tool-bin,
+          artifacts:  bin/aarch64-lldap,
+                      bin/amd64-llap,
+                      bin/armhf-lldap,
+                      bin/aarch64-migration-tool,
+                      bin/amd64-migration-tool,
+                      bin/armhf-migration-tool,
                       web.zip
         env:
          GITHUB_TOKEN: ${{ github.token }}
