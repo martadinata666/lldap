@@ -269,7 +269,7 @@ jobs:
 ### Download artifacts, clean up ui, upload to release page ###
 ###############################################################
   create-release-artifacts:
-     needs: [build-ui,build-armhf,build-aarch64,build-amd64]
+     needs: [build-ui,build-bin]
      name: Create release artifacts
      if: github.event_name == 'release'
      runs-on: ubuntu-latest
