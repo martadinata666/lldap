@@ -131,7 +131,7 @@ jobs:
         with:
           name: ${{ matrix.target}}-lldap-bin
           path: target/${{ matrix.target }}/release/lldap
-      - name: upload ${{ matrix.target }} artifacts
+      - name: upload ${{ matrix.target }} migration tool artifacts
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.target }}-migration-tool-bin
@@ -269,6 +269,7 @@ jobs:
 ### Download artifacts, clean up ui, upload to release page ###
 ###############################################################
   create-release-artifacts:
+  # armv7-unknown-linux-gnueabihf,aarch64-unknown-linux-musl,x86_64-unknown-linux-musl
      needs: [build-ui,build-bin]
      name: Create release artifacts
      if: github.event_name == 'release'
@@ -282,12 +283,12 @@ jobs:
         run: ls -alR bin/
       - name: Fixing Filename
         run: |
-             mv bin/aarch64-lldap-bin/lldap bin/aarch64-lldap
-             mv bin/amd64-lldap-bin/lldap bin/amd64-lldap
-             mv bin/armhf-lldap-bin/lldap bin/armhf-lldap
-             mv bin/aarch64-migration-tool-bin/migration-tool bin/aarch64-migration-tool
-             mv bin/amd64-migration-tool-bin/migration-tool bin/amd64-migration-tool
-             mv bin/armhf-migration-tool-bin/migration-tool bin/armhf-migration-tool
+             mv bin/aarch64-unknown-linux-musl-lldap-bin/lldap bin/aarch64-lldap
+             mv bin/x86_64-unknown-linux-musl-lldap-bin/lldap bin/amd64-lldap
+             mv bin/armv7-unknown-linux-gnueabihf-lldap-bin/lldap bin/armhf-lldap
+             mv bin/aarch64-unknown-linux-musl-migration-tool-bin/migration-tool bin/aarch64-migration-tool
+             mv bin/x86_64-unknown-linux-musl-migration-tool-bin/migration-tool bin/amd64-migration-tool
+             mv bin/armv7-unknown-linux-gnueabihf-migration-tool-bin/migration-tool bin/armhf-migration-tool
              chmod +x bin/*-lldap
              chmod +x bin/*-migration-tool
 
