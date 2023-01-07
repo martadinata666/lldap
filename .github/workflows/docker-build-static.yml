@@ -53,7 +53,7 @@ jobs:
   build-ui:
     runs-on: ubuntu-latest
     container:
-      image: nitnelave/rust-dev:latest
+      image: martadinata666/rust-dev:latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3.3.0
@@ -92,7 +92,7 @@ jobs:
       matrix:
         target: [armv7-unknown-linux-gnueabihf,aarch64-unknown-linux-musl,x86_64-unknown-linux-musl]
     container:
-      image: nitnelave/rust-dev:latest
+      image: martadinata666/rust-dev:latest
       env:
         CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER: arm-linux-gnueabihf-gcc
         CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: aarch64-linux-musl-gcc
@@ -150,10 +150,12 @@ jobs:
         include:
           - base: alpine
             platforms: linux/amd64,linux/arm64
-            tags: nitnelave/lldap:latest, nitnelave/lldap:latest-alpine
+            tags: martadinata666/lldap:latest, martadinata666/lldap:latest-alpine
+            tags-stable: martadinata666/lldap:stable, martadinata666/lldap:v${{ steps.slug.outputs.version-semantic }},martadinata666/lldap:v${{ steps.slug.outputs.version-major }},martadinata666/lldap:v${{ steps.slug.outputs.version-major }}.${{ steps.slug.outputs.version-minor }},martadinata666/lldap:v${{ steps.slug.outputs.version-major }}.${{ steps.slug.outputs.version-minor }}.${{ steps.slug.outputs.version-patch }}
           - base: debian
             platforms: linux/amd64,linux/arm64,linux/arm/v7
-            tags: nitnelave/lldap:latest-debian
+            tags: martadinata666/lldap:latest-debian
+            tags-stable: martadinata666/lldap:stable-debian
 
     steps:
       - name: fetch repo
@@ -179,7 +181,7 @@ jobs:
         with:
           # list of Docker images to use as base name for tags
           images: |
-            nitnelave/lldap
+            martadinata666/lldap
           # generate Docker tags based on the following events/attributes
           tags: |
             type=ref,event=branch
@@ -193,12 +195,12 @@ jobs:
         uses: gacts/github-slug@v1
         id: slug
 
-#      - name: Login to Docker Hub
-#        if: github.event_name != 'pull_request'
-#        uses: docker/login-action@v2
-#        with:
-#          username: ${{ secrets.DOCKERHUB_USERNAME }}
-#          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Login to Docker Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
 ########################################
 #### docker image :latest tag build ####
@@ -218,39 +220,26 @@ jobs:
 ########################################
 #### docker image :semver tag build ####
 ########################################
-      - name: Build and push release alpine
+      - name: Build and push release ${{ matrix.base }}
         if: github.event_name == 'release'
         uses: docker/build-push-action@v3
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ matrix.platforms }}
           push: true
           # Tag as latest, stable, semver, major, major.minor and major.minor.patch.
-          file: ./.github/workflows/Dockerfile.ci.alpine
-          tags: nitnelave/lldap:stable, nitnelave/lldap:stable-alpine, nitnelave/lldap:v${{ steps.slug.outputs.version-semantic }}, nitnelave/lldap:v${{ steps.slug.outputs.version-major }}, nitnelave/lldap:v${{ steps.slug.outputs.version-major }}.${{ steps.slug.outputs.version-minor }}, nitnelave/lldap:v${{ steps.slug.outputs.version-major }}.${{ steps.slug.outputs.version-minor }}.${{ steps.slug.outputs.version-patch }}, nitnelave/lldap:v${{ steps.slug.outputs.version-semantic }}-alpine, nitnelave/lldap:v${{ steps.slug.outputs.version-major }}-alpine, nitnelave/lldap:v${{ steps.slug.outputs.version-major }}-alpine.${{ steps.slug.outputs.version-minor }}-alpine, nitnelave/lldap:v${{ steps.slug.outputs.version-major }}.${{ steps.slug.outputs.version-minor }}.${{ steps.slug.outputs.version-patch }}-alpine
+          file: ./.github/workflows/Dockerfile.ci.${{ matrix.base }}
+          tags: ${{ matrix.tags-stable }}, martadinata666/lldap:v${{ steps.slug.outputs.version-semantic }}-${{ matrix.base }},martadinata666/lldap:v${{ steps.slug.outputs.version-major }}-${{ matrix.base }},martadinata666/lldap:v${{ steps.slug.outputs.version-major }}-${{ matrix.base }}.${{ steps.slug.outputs.version-minor }}-${{ matrix.base }},martadinata666/lldap:v${{ steps.slug.outputs.version-major }}.${{ steps.slug.outputs.version-minor }}.${{ steps.slug.outputs.version-patch }}-${{ matrix.base }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and push release debian
-        if: github.event_name == 'release'
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
-          push: true
-          # Tag as latest, stable, semver, major, major.minor and major.minor.patch.
-          file: ./.github/workflows/Dockerfile.ci.debian
-          tags: nitnelave/lldap:stable-debian, nitnelave/lldap:v${{ steps.slug.outputs.version-semantic }}-debian, nitnelave/lldap:v${{ steps.slug.outputs.version-major }}-debian, nitnelave/lldap:v${{ steps.slug.outputs.version-major }}.${{ steps.slug.outputs.version-minor }}-debian, nitnelave/lldap:v${{ steps.slug.outputs.version-major }}.${{ steps.slug.outputs.version-minor }}.${{ steps.slug.outputs.version-patch }}-debian
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new
-
-      - name: Update repo description
-        if: github.event_name != 'pull_request'
-        uses: peter-evans/dockerhub-description@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-          repository: nitnelave/lldap
+#      - name: Update repo description
+#        if: github.event_name != 'pull_request'
+#        uses: peter-evans/dockerhub-description@v3
+#        with:
+#          username: ${{ secrets.DOCKERHUB_USERNAME }}
+#          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+#          repository: martadinata666/lldap
 
 ###############################################################
 ### Download artifacts, clean up ui, upload to release page ###
