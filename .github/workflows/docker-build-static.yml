@@ -86,23 +86,29 @@ jobs:
           name: ui
           path: app/
 
-  build-armhf:
+  build-bin:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [armv7-unknown-linux-gnueabihf,aarch64-unknown-linux-musl,x86_64-unknown-linux-musl]
     container:
       image: nitnelave/rust-dev:latest
       env:
         CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER: arm-linux-gnueabihf-gcc
-        CARGO_TARGET_ARMV7_UNKNOWN_LINUX_MUSLEABIHF_LINKER: arm-linux-gnueabihf-ld
+        CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: aarch64-linux-musl-gcc
+        CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER: x86_64-linux-musl-gcc
         CARGO_TERM_COLOR: always
-        RUSTFLAGS: -Ctarget-feature=-crt-static
+        RUSTFLAGS: -Ctarget-feature=+crt-static
         CARGO_HOME: ${GITHUB_WORKSPACE}/.cargo
     steps:
       - name: add armhf architecture
         run: dpkg --add-architecture armhf
       - name: install runtime
-        run: apt update && apt install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf libc6-armhf-cross libc6-dev-armhf-cross tar ca-certificates
-      - name: add armhf target
-        run: rustup target add armv7-unknown-linux-gnueabihf
+        run: |
+             apt update
+             apt install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf libc6-armhf-cross libc6-dev-armhf-cross tar ca-certificates musl-tools
+      - name: add ${{ matrix.target }} target
+        run: rustup target ${{ matrix.target }}
       - name: Checkout repository
         uses: actions/checkout@v3.3.0
       - uses: actions/cache@v3
@@ -113,120 +119,26 @@ jobs:
             .cargo/registry/cache
             .cargo/git/db
             target
-          key: lldap-bin-armhf-${{ hashFiles('**/Cargo.lock') }}
+          key: lldap-bin-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            lldap-bin-armhf-
-      - name: compile armhf
-        run: cargo build --target=armv7-unknown-linux-gnueabihf --release -p lldap -p migration-tool
+            lldap-bin-
+      - name: compile ${{ matrix.target }}
+        run: cargo build --target=${{ matrix.target }} --release -p lldap -p migration-tool
       - name: check path
         run: ls -al target/release
-      - name: upload armhf lldap artifacts
+      - name: upload ${{ matrix.target}} lldap artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: armhf-lldap-bin
-          path: target/armv7-unknown-linux-gnueabihf/release/lldap
-      - name: upload armhfmigration-tool artifacts
+          name: ${{ matrix.target}}-lldap-bin
+          path: target/${{ matrix.target }}/release/lldap
+      - name: upload ${{ matrix.target }} artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: armhf-migration-tool-bin
-          path: target/armv7-unknown-linux-gnueabihf/release/migration-tool
-
-
-  build-aarch64:
-    runs-on: ubuntu-latest
-    container:
-      image: nitnelave/rust-dev:latest
-      env:
-        CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: aarch64-linux-musl-gcc
-        CARGO_TERM_COLOR: always
-        RUSTFLAGS: -Ctarget-feature=+crt-static
-        CARGO_HOME: ${GITHUB_WORKSPACE}/.cargo
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3.3.0
-      - uses: actions/cache@v3
-        with:
-          path: |
-            .cargo/bin
-            .cargo/registry/index
-            .cargo/registry/cache
-            .cargo/git/db
-            target
-          key: lldap-bin-aarch64-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-           lldap-bin-aarch64-
-#      - name: fetch musl-gcc
-#        run: |
-#             wget -c https://musl.cc/aarch64-linux-musl-cross.tgz
-#             tar zxf ./x86_64-linux-musl-cross.tgz -C /opt
-#             echo "/opt/aarch64-linux-musl-cross:/opt/aarch64-linux-musl-cross/bin" >> $GITHUB_PATH
-      - name: add musl aarch64 target
-        run: rustup target add aarch64-unknown-linux-musl
-      - name: build lldap aarch4
-        run: cargo build --target=aarch64-unknown-linux-musl --release -p lldap -p migration-tool
-      - name: check path
-        run: ls -al target/aarch64-unknown-linux-musl/release/
-      - name: upload aarch64 lldap artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: aarch64-lldap-bin
-          path: target/aarch64-unknown-linux-musl/release/lldap
-      - name: upload aarch64 migration-tool artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: aarch64-migration-tool-bin
-          path: target/aarch64-unknown-linux-musl/release/migration-tool
-
-  build-amd64:
-    runs-on: ubuntu-latest
-    container:
-      image: nitnelave/rust-dev:latest
-      env:
-        CARGO_TERM_COLOR: always
-        RUSTFLAGS: -Ctarget-feature=+crt-static
-        CARGO_HOME: ${GITHUB_WORKSPACE}/.cargo
-        CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER: x86_64-linux-musl-gcc
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3.3.0
-      - uses: actions/cache@v3
-        with:
-          path: |
-            .cargo/bin
-            .cargo/registry/index
-            .cargo/registry/cache
-            .cargo/git/db
-            target
-          key: lldap-bin-amd64-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            lldap-bin-amd64-
-      - name: install musl
-        run: apt update && apt install -y musl-tools tar wget
-#      - name: fetch musl-gcc
-#        run: |
-#             wget -c https://musl.cc/x86_64-linux-musl-cross.tgz
-#             tar zxf ./x86_64-linux-musl-cross.tgz -C /opt
-#             echo "/opt/x86_64-linux-musl-cross:/opt/x86_64-linux-musl-cross/bin" >> $GITHUB_PATH
-      - name: add x86_64 target
-        run: rustup target add x86_64-unknown-linux-musl
-      - name: build x86_64 lldap
-        run: cargo build --target=x86_64-unknown-linux-musl --release -p lldap -p migration-tool
-      - name: check path
-        run: ls -al target/x86_64-unknown-linux-musl/release/
-      - name: upload amd64 lldap artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: amd64-lldap-bin
-          path: target/x86_64-unknown-linux-musl/release/lldap
-      - name: upload amd64 migration-tool artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: amd64-migration-tool-bin
-          path: target/x86_64-unknown-linux-musl/release/migration-tool
-
+          name: ${{ matrix.target }}-migration-tool-bin
+          path: target/${{ matrix.target }}/release/migration-tool
 
   build-docker-image:
-    needs: [build-ui,build-armhf,build-aarch64,build-amd64]
+    needs: [build-ui,build-bin]
     name: Build Docker image
     runs-on: ubuntu-latest
     permissions:
