@@ -99,7 +99,7 @@ jobs:
         CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER: x86_64-linux-musl-gcc
         CARGO_TERM_COLOR: always
         RUSTFLAGS: -Ctarget-feature=+crt-static
-        CARGO_HOME: ${GITHUB_WORKSPACE}/.cargo
+        CARGO_HOME: ${GITHUB_WORKSPACE}/${{ matrix.target }}/.cargo
     steps:
       - name: add armhf architecture
         run: dpkg --add-architecture armhf
@@ -114,11 +114,11 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: |
-            .cargo/bin
-            .cargo/registry/index
-            .cargo/registry/cache
-            .cargo/git/db
-            target
+            ${{ matrix.target }}/.cargo/bin
+            ${{ matrix.target }}/.cargo/registry/index
+            ${{ matrix.target }}/.cargo/registry/cache
+            ${{ matrix.target }}/.cargo/git/db
+            target/${{ matrix.target }}
           key: lldap-bin-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             lldap-bin-${{matrix.target }}-
