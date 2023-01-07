@@ -119,9 +119,9 @@ jobs:
             .cargo/registry/cache
             .cargo/git/db
             target
-          key: lldap-bin-${{ hashFiles('**/Cargo.lock') }}
+          key: lldap-bin-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            lldap-bin-
+            lldap-bin-${{matrix.target }}-
       - name: compile ${{ matrix.target }}
         run: cargo build --target=${{ matrix.target }} --release -p lldap -p migration-tool
       - name: check path
