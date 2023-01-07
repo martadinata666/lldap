@@ -21,8 +21,8 @@ RUN if [ "${TARGETPLATFORM}" = "linux/amd64" ]; then \
     ; fi
 
 RUN if [ "${TARGETPLATFORM}" = "linux/arm64" ]; then \
-    mv bin/aarch64-unknown-linux-musllldap-bin/lldap target/lldap && \
-    mv bin/aarch64-unknown-linux-muslmigration-tool-bin/migration-tool target/migration-tool && \
+    mv bin/aarch64-unknown-linux-musl-lldap-bin/lldap target/lldap && \
+    mv bin/aarch64-unknown-linux-musl-migration-tool-bin/migration-tool target/migration-tool && \
     chmod +x target/lldap && \
     chmod +x target/migration-tool && \
     ls -la target/ . && \
