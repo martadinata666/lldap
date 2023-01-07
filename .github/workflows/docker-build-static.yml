@@ -108,7 +108,7 @@ jobs:
              apt update
              apt install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf libc6-armhf-cross libc6-dev-armhf-cross tar ca-certificates musl-tools
       - name: add ${{ matrix.target }} target
-        run: rustup target ${{ matrix.target }}
+        run: rustup target add ${{ matrix.target }}
       - name: Checkout repository
         uses: actions/checkout@v3.3.0
       - uses: actions/cache@v3
