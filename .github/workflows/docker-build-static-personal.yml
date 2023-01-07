@@ -1,15 +1,15 @@
-name: Docker Static
+name: Docker Static Personal
 
 on:
   push:
     branches:
-      - 'main'
+      - 'personal'
   release:
     types:
       - 'published'
   pull_request:
     branches:
-      - 'main'
+      - 'personal'
   workflow_dispatch:
     inputs:
       msg:
@@ -54,28 +54,27 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: martadinata666/rust:latest
+      options: --user root
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3.3.0
+#      - name: Pull from git
+#        run: |
+#              sudo apt update
+#              sudo apt -y install git
+#              git clone --depth=1 -b personal https://github.com/martadinata666/lldap.git lldap
+      - uses: actions/checkout@v3
       - uses: actions/cache@v3
         with:
           path: |
-            /usr/local/cargo/bin
-            /usr/local/cargo/registry/index
-            /usr/local/cargo/registry/cache
-            /usr/local/cargo/git/db
+            cargo/registry/index
+            cargo/registry/cache
+            cargo/git/db
             target
           key: lldap-ui-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             lldap-ui-
-      - name: install rollup nodejs
-        run: npm install -g rollup
-      - name: add wasm target
-        run: rustup target add wasm32-unknown-unknown
-      - name: install wasm-pack with cargo
-        run: cargo install wasm-pack || true
-        env:
-          RUSTFLAGS: ""
+      - name: install wasm-pack and rollup nodejs
+        run: sudo npm install -g rollup
+             sudo npm install -g wasm-pack
       - name: build frontend
         run: ./app/build.sh
       - name: check path
@@ -93,6 +92,7 @@ jobs:
         target: [armv7-unknown-linux-gnueabihf,aarch64-unknown-linux-musl,x86_64-unknown-linux-musl]
     container:
       image: martadinata666/rust:latest
+      options: --user root
       env:
         CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER: arm-linux-gnueabihf-gcc
         CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: aarch64-linux-musl-gcc
@@ -101,12 +101,15 @@ jobs:
         RUSTFLAGS: -Ctarget-feature=+crt-static
         CARGO_HOME: ${GITHUB_WORKSPACE}/.cargo
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3.3.0
+#      - name: Pull from git
+#        run: |
+#              sudo apt update 
+#              sudo apt install git
+#              git clone --depth=1 -b personal https://github.com/martadinata666/lldap.git lldap
+      - uses: actions/checkout@v3
       - uses: actions/cache@v3
         with:
           path: |
-            .cargo/bin
             .cargo/registry/index
             .cargo/registry/cache
             .cargo/git/db
@@ -116,6 +119,8 @@ jobs:
             lldap-bin-${{ matrix.target }}-
       - name: show my env
         run: env
+      - name: Add target
+        run: rustup target add ${{ matrix.target }}
       - name: compile ${{ matrix.target }}
         run: cargo build --target=${{ matrix.target }} --release -p lldap -p migration-tool
       - name: check path
@@ -140,16 +145,10 @@ jobs:
       packages: write
     strategy:
       matrix:
-        base: [alpine, debian]
+        base: [debian]
         include:
-          - base: alpine
-            platforms: linux/amd64,linux/arm64
-            tags: martadinata666/lldap:alpha
-            tags-stable: martadinata666/lldap:stable
           - base: debian
-            platforms: linux/amd64,linux/arm64,linux/arm/v7
-            tags: martadinata666/lldap:alpha
-            tags-stable: martadinata666/lldap:stable, martadinata666/lldap:latest
+            platforms: linux/amd64,linux/arm64
 
     steps:
       - name: fetch repo
@@ -158,10 +157,6 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           path: bin
-
-      - name: parse tag
-        uses: gacts/github-slug@v1
-        id: slug
 
       - name: Download llap ui artifacts
         uses: actions/download-artifact@v3
@@ -174,7 +169,7 @@ jobs:
       - uses: docker/setup-buildx-action@v2
 
       - name: Docker meta
-        id: meta
+        id: metaid
         uses: docker/metadata-action@v4
         with:
           # list of Docker images to use as base name for tags
@@ -187,7 +182,6 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
-            type=sha
 
       - name: Login to Docker Hub
         if: github.event_name != 'pull_request'
@@ -196,49 +190,19 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-########################################
-#### docker image :latest tag build ####
-########################################
+#######################################################
+#### docker image based one metaid steps tag build ####
+#######################################################
       - name: Build and push latest ${{ matrix.base }}
-        if: github.event_name != 'release'
         uses: docker/build-push-action@v3
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
           platforms: ${{ matrix.platforms }}
-          file: ./.github/workflows/Dockerfile.ci.${{ matrix.base }}
-          tags: ${{ matrix.tags }}
+          file: ./.github/workflows/Dockerfile.ci.${{ matrix.base }}.personal
+          tags: ${{ steps.metaid.outputs.tags }}-${{ matrix.base }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-########################################
-#### docker image :semver tag build ####
-########################################
-      - name: Build and push release ${{ matrix.base }}
-        if: github.event_name == 'release'
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          platforms: ${{ matrix.platforms }}
-          push: true
-          # Tag as latest, stable, semver, major, major.minor and major.minor.patch.
-          file: ./.github/workflows/Dockerfile.ci.${{ matrix.base }}
-          tags: ${{ matrix.tags-stable }},
-                martadinata666/lldap:v${{ steps.slug.outputs.version-semantic }}-${{ matrix.base }},
-                martadinata666/lldap:v${{ steps.slug.outputs.version-major }}-${{ matrix.base }},
-                martadinata666/lldap:v${{ steps.slug.outputs.version-major }}.${{ steps.slug.outputs.version-minor }}-${{ matrix.base }},
-                martadinata666/lldap:v${{ steps.slug.outputs.version-major }}.${{ steps.slug.outputs.version-minor }}.${{ steps.slug.outputs.version-patch }}-${{ matrix.base }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-# , martadinata666/lldap:v${{ steps.slug.outputs.version-semantic }},martadinata666/lldap:v${{ steps.slug.outputs.version-major }},martadinata666/lldap:v${{ steps.slug.outputs.version-major }}.${{ steps.slug.outputs.version-minor }},martadinata666/lldap:v${{ steps.slug.outputs.version-major }}.${{ steps.slug.outputs.version-minor }}.${{ steps.slug.outputs.version-patch }}
-#      - name: Update repo description
-#        if: github.event_name != 'pull_request'
-#        uses: peter-evans/dockerhub-description@v3
-#        with:
-#          username: ${{ secrets.DOCKERHUB_USERNAME }}
-#          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-#          repository: martadinata666/lldap
 
 ###############################################################
 ### Download artifacts, clean up ui, upload to release page ###
