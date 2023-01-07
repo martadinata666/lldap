@@ -151,7 +151,7 @@ jobs:
           - base: alpine
             platforms: linux/amd64,linux/arm64
             tags: martadinata666/lldap:latest, martadinata666/lldap:latest-alpine
-            tags-stable: martadinata666/lldap:stable, martadinata666/lldap:v${{ steps.slug.outputs.version-semantic }},martadinata666/lldap:v${{ steps.slug.outputs.version-major }},martadinata666/lldap:v${{ steps.slug.outputs.version-major }}.${{ steps.slug.outputs.version-minor }},martadinata666/lldap:v${{ steps.slug.outputs.version-major }}.${{ steps.slug.outputs.version-minor }}.${{ steps.slug.outputs.version-patch }}
+            tags-stable: martadinata666/lldap:stable
           - base: debian
             platforms: linux/amd64,linux/arm64,linux/arm/v7
             tags: martadinata666/lldap:latest-debian
@@ -164,6 +164,10 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           path: bin
+
+      - name: parse tag
+        uses: gacts/github-slug@v1
+        id: slug
 
       - name: Download llap ui artifacts
         uses: actions/download-artifact@v3
@@ -190,10 +194,6 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=sha
-
-      - name: parse tag
-        uses: gacts/github-slug@v1
-        id: slug
 
       - name: Login to Docker Hub
         if: github.event_name != 'pull_request'
@@ -232,7 +232,7 @@ jobs:
           tags: ${{ matrix.tags-stable }}, martadinata666/lldap:v${{ steps.slug.outputs.version-semantic }}-${{ matrix.base }},martadinata666/lldap:v${{ steps.slug.outputs.version-major }}-${{ matrix.base }},martadinata666/lldap:v${{ steps.slug.outputs.version-major }}-${{ matrix.base }}.${{ steps.slug.outputs.version-minor }}-${{ matrix.base }},martadinata666/lldap:v${{ steps.slug.outputs.version-major }}.${{ steps.slug.outputs.version-minor }}.${{ steps.slug.outputs.version-patch }}-${{ matrix.base }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
+# , martadinata666/lldap:v${{ steps.slug.outputs.version-semantic }},martadinata666/lldap:v${{ steps.slug.outputs.version-major }},martadinata666/lldap:v${{ steps.slug.outputs.version-major }}.${{ steps.slug.outputs.version-minor }},martadinata666/lldap:v${{ steps.slug.outputs.version-major }}.${{ steps.slug.outputs.version-minor }}.${{ steps.slug.outputs.version-patch }}
 #      - name: Update repo description
 #        if: github.event_name != 'pull_request'
 #        uses: peter-evans/dockerhub-description@v3
