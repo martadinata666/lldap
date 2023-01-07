@@ -229,7 +229,7 @@ jobs:
           push: true
           # Tag as latest, stable, semver, major, major.minor and major.minor.patch.
           file: ./.github/workflows/Dockerfile.ci.${{ matrix.base }}
-          tags: ${{ matrix.tags-stable }}, martadinata666/lldap:v${{ steps.slug.outputs.version-semantic }}-${{ matrix.base }},martadinata666/lldap:v${{ steps.slug.outputs.version-major }}-${{ matrix.base }},martadinata666/lldap:v${{ steps.slug.outputs.version-major }}-${{ matrix.base }}.${{ steps.slug.outputs.version-minor }}-${{ matrix.base }},martadinata666/lldap:v${{ steps.slug.outputs.version-major }}.${{ steps.slug.outputs.version-minor }}.${{ steps.slug.outputs.version-patch }}-${{ matrix.base }}
+          tags: ${{ matrix.tags-stable }}, martadinata666/lldap:v${{ steps.slug.outputs.version-semantic }}-${{ matrix.base }},martadinata666/lldap:v${{ steps.slug.outputs.version-major }}-${{ matrix.base }},martadinata666/lldap:v${{ steps.slug.outputs.version-major }}-.${{ steps.slug.outputs.version-minor }}-${{ matrix.base }},martadinata666/lldap:v${{ steps.slug.outputs.version-major }}.${{ steps.slug.outputs.version-minor }}.${{ steps.slug.outputs.version-patch }}-${{ matrix.base }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 # , martadinata666/lldap:v${{ steps.slug.outputs.version-semantic }},martadinata666/lldap:v${{ steps.slug.outputs.version-major }},martadinata666/lldap:v${{ steps.slug.outputs.version-major }}.${{ steps.slug.outputs.version-minor }},martadinata666/lldap:v${{ steps.slug.outputs.version-major }}.${{ steps.slug.outputs.version-minor }}.${{ steps.slug.outputs.version-patch }}
