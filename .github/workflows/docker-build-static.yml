@@ -99,7 +99,7 @@ jobs:
         CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER: x86_64-linux-musl-gcc
         CARGO_TERM_COLOR: always
         RUSTFLAGS: -Ctarget-feature=+crt-static
-        CARGO_HOME: ${GITHUB_WORKSPACE}/${{ matrix.target }}/.cargo
+        CARGO_HOME: ${GITHUB_WORKSPACE}/.cargo
     steps:
       - name: add armhf architecture
         run: dpkg --add-architecture armhf
@@ -107,23 +107,23 @@ jobs:
         run: |
              apt update
              apt install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf libc6-armhf-cross libc6-dev-armhf-cross tar ca-certificates musl-tools
-      - name: add ${{ matrix.target }} target
-        run: rustup target add ${{ matrix.target }}
       - name: Checkout repository
         uses: actions/checkout@v3.3.0
       - uses: actions/cache@v3
         with:
           path: |
-            ${{ matrix.target }}/.cargo/bin
-            ${{ matrix.target }}/.cargo/registry/index
-            ${{ matrix.target }}/.cargo/registry/cache
-            ${{ matrix.target }}/.cargo/git/db
-            target/${{ matrix.target }}
+            .cargo/bin
+            .cargo/registry/index
+            .cargo/registry/cache
+            .cargo/git/db
+            target/
           key: lldap-bin-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            lldap-bin-${{matrix.target }}-
+            lldap-bin-${{ matrix.target }}-
       - name: show my env
         run: env
+      - name: add ${{ matrix.target }} target
+        run: rustup target add ${{ matrix.target }}
       - name: compile ${{ matrix.target }}
         run: cargo build --target=${{ matrix.target }} --release -p lldap -p migration-tool
       - name: check path
