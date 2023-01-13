@@ -4,7 +4,7 @@ use sea_orm::Value;
 pub type DbConnection = sea_orm::DatabaseConnection;
 
 #[derive(Copy, PartialEq, Eq, Debug, Clone)]
-pub struct SchemaVersion(pub u8);
+pub struct SchemaVersion(pub i16);
 
 impl sea_orm::TryGetable for SchemaVersion {
     fn try_get(
@@ -12,7 +12,7 @@ impl sea_orm::TryGetable for SchemaVersion {
         pre: &str,
         col: &str,
     ) -> Result<Self, sea_orm::TryGetError> {
-        Ok(SchemaVersion(u8::try_get(res, pre, col)?))
+        Ok(SchemaVersion(i16::try_get(res, pre, col)?))
     }
 }
 
@@ -67,7 +67,7 @@ mod tests {
         #[derive(FromQueryResult, PartialEq, Eq, Debug)]
         struct ShortUserDetails {
             display_name: String,
-            creation_date: chrono::DateTime<chrono::Utc>,
+            creation_date: chrono::NaiveDateTime,
         }
         let result = ShortUserDetails::find_by_statement(raw_statement(
             r#"SELECT display_name, creation_date FROM users WHERE user_id = "bôb""#,
@@ -80,7 +80,7 @@ mod tests {
             result,
             ShortUserDetails {
                 display_name: "Bob Bobbersön".to_owned(),
-                creation_date: Utc.timestamp_opt(0, 0).unwrap()
+                creation_date: Utc.timestamp_opt(0, 0).unwrap().naive_utc(),
             }
         );
     }

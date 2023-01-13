@@ -116,6 +116,7 @@ pub async fn upgrade_to_v1(pool: &DbConnection) -> std::result::Result<(), sea_o
                 .col(
                     ColumnDef::new(Groups::GroupId)
                         .integer()
+                        .auto_increment()
                         .not_null()
                         .primary_key(),
                 )
@@ -169,7 +170,7 @@ pub async fn upgrade_to_v1(pool: &DbConnection) -> std::result::Result<(), sea_o
         struct ShortGroupDetails {
             group_id: GroupId,
             display_name: String,
-            creation_date: chrono::DateTime<chrono::Utc>,
+            creation_date: chrono::NaiveDateTime,
         }
         for result in ShortGroupDetails::find_by_statement(
             builder.build(
@@ -219,7 +220,7 @@ pub async fn upgrade_to_v1(pool: &DbConnection) -> std::result::Result<(), sea_o
         #[derive(FromQueryResult)]
         struct ShortUserDetails {
             user_id: UserId,
-            creation_date: chrono::DateTime<chrono::Utc>,
+            creation_date: chrono::NaiveDateTime,
         }
         for result in ShortUserDetails::find_by_statement(
             builder.build(
@@ -309,7 +310,7 @@ pub async fn upgrade_to_v1(pool: &DbConnection) -> std::result::Result<(), sea_o
             Table::create()
                 .table(Metadata::Table)
                 .if_not_exists()
-                .col(ColumnDef::new(Metadata::Version).tiny_integer()),
+                .col(ColumnDef::new(Metadata::Version).small_integer()),
         ),
     )
     .await?;
