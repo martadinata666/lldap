@@ -65,6 +65,6 @@ COPY --from=lldap --chown=$CONTAINERUSER:$CONTAINERUSER /lldap /app
 COPY --from=lldap --chown=$CONTAINERUSER:$CONTAINERUSER /docker-entrypoint.sh /docker-entrypoint.sh
 VOLUME ["/data"]
 WORKDIR /app
-ENTRYPOINT ["tini", "--", "/docker-entrypoint.sh"]
+ENTRYPOINT ["tini", "--", "lldap"]
 CMD ["run", "--config-file", "/data/lldap_config.toml"]
-HEALTHCHECK CMD ["/app/lldap", "run", "--config-file", "/data/lldap_config.toml"]
+HEALTHCHECK CMD ["/app/lldap", "healtcheck", "--config-file", "/data/lldap_config.toml"]
