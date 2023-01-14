@@ -152,7 +152,7 @@ jobs:
             MYSQL_ROOT_PASSWORD: rootpass
 
         postgresql:
-           image: postgresql:latest
+           image: postgres:latest
            ports:
              - 5432
            env:
