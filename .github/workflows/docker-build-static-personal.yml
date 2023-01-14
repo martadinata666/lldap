@@ -138,27 +138,27 @@ jobs:
 
   lldap-test:
     needs: [build-ui,build-bin]
-    name: Create release artifacts
+    name: LLDAP test
     runs-on: ubuntu-latest
-    services:
-      mariadb:
-        image: mariadb:latest
-        ports:
-          - 3306
-        env:
-          MYSQL_USER: lldap
-          MYSQL_PASSWORD: lldappass
-          MYSQL_DATABASE: lldap
-          MYSQL_ROOT_PASSWORD: rootpass
+      services:
+        mariadb:
+          image: mariadb:latest
+          ports:
+            - 3306
+          env:
+            MYSQL_USER: lldap
+            MYSQL_PASSWORD: lldappass
+           MYSQL_DATABASE: lldap
+            MYSQL_ROOT_PASSWORD: rootpass
 
-      postgresql:
-         image: postgresql:latest
-         ports:
-           - 5432
-         env:
-           - POSTGRES_USER: lldap
-           - POSTGRES_PASSWORD: lldappass
-           - POSTGRES_DB: lldap
+        postgresql:
+           image: postgresql:latest
+           ports:
+             - 5432
+           env:
+             POSTGRES_USER: lldap
+             POSTGRES_PASSWORD: lldappass
+             POSTGRES_DB: lldap
 
       steps:
        - name: Download All Artifacts
