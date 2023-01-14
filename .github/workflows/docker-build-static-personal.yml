@@ -148,7 +148,7 @@ jobs:
           env:
             MYSQL_USER: lldap
             MYSQL_PASSWORD: lldappass
-           MYSQL_DATABASE: lldap
+            MYSQL_DATABASE: lldap
             MYSQL_ROOT_PASSWORD: rootpass
 
         postgresql:
