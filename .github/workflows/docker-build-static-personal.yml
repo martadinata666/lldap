@@ -171,12 +171,16 @@ jobs:
          run: bin/x86_64-unknown-linux-musl-lldap-bin/lldap run &
          env:
            LLDAP_database_url: postgres://lldapuser:lldappass@localhost/lldap
+           LLDAP_ldap_port: 3890
+           LLDAP_http_port: 17170
 
 
        - name: run lldap with mariadb DB (MySQL Compatible)
          run: bin/x86_64-unknown-linux-musl-lldap-bin/lldap run &
          env:
            LLDAP_database_url: mysql://lldapuser:lldappass@localhost/lldap
+           LLDAP_ldap_port: 3891
+           LLDAP_http_port: 17171
 
 
 
