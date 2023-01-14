@@ -140,7 +140,7 @@ jobs:
     needs: [build-ui,build-bin]
     name: LLDAP test
     runs-on: ubuntu-latest
-      services:
+    services:
         mariadb:
           image: mariadb:latest
           ports:
@@ -160,7 +160,7 @@ jobs:
              POSTGRES_PASSWORD: lldappass
              POSTGRES_DB: lldap
 
-      steps:
+    steps:
        - name: Download All Artifacts
          uses: actions/download-artifact@v3
          with:
