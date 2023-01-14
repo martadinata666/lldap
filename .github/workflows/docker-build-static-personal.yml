@@ -168,7 +168,9 @@ jobs:
        - name: Set executables
          run: chmod +x bin/*/lldap
        - name: run lldap with postgres DB
-         run: bin/x86_64-unknown-linux-musl-lldap-bin/lldap run &
+         run: |
+              bin/x86_64-unknown-linux-musl-lldap-bin/lldap run &
+              bin/x86_64-unknown-linux-musl-lldap-bin/lldap healthcheck
          env:
            LLDAP_database_url: postgres://lldapuser:lldappass@localhost/lldap
            LLDAP_ldap_port: 3890
@@ -176,7 +178,9 @@ jobs:
 
 
        - name: run lldap with mariadb DB (MySQL Compatible)
-         run: bin/x86_64-unknown-linux-musl-lldap-bin/lldap run &
+         run: |
+              bin/x86_64-unknown-linux-musl-lldap-bin/lldap run &
+              bin/x86_64-unknown-linux-musl-lldap-bin/lldap healthcheck
          env:
            LLDAP_database_url: mysql://lldapuser:lldappass@localhost/lldap
            LLDAP_ldap_port: 3891
@@ -257,7 +261,7 @@ jobs:
 ###############################################################
   create-release-artifacts:
   # armv7-unknown-linux-gnueabihf,aarch64-unknown-linux-musl,x86_64-unknown-linux-musl
-     needs: [build-ui,build-bin]
+     needs: [lldap-test]
      name: Create release artifacts
      if: github.event_name == 'release'
      runs-on: ubuntu-latest
