@@ -144,7 +144,7 @@ jobs:
         mariadb:
           image: mariadb:latest
           ports:
-            - 3306
+            - 3306:3306
           env:
             MYSQL_USER: lldapuser
             MYSQL_PASSWORD: lldappass
@@ -154,7 +154,7 @@ jobs:
         postgresql:
            image: postgres:latest
            ports:
-             - 5432
+             - 5432:5432
            env:
              POSTGRES_USER: lldapuser
              POSTGRES_PASSWORD: lldappass
