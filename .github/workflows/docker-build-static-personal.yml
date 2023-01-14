@@ -136,8 +136,49 @@ jobs:
           name: ${{ matrix.target }}-migration-tool-bin
           path: target/${{ matrix.target }}/release/migration-tool
 
-  build-docker-image:
+  lldap-test:
     needs: [build-ui,build-bin]
+    name: Create release artifacts
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:latest
+        ports:
+          - 3306
+        env:
+          MYSQL_USER: lldap
+          MYSQL_PASSWORD: lldappass
+          MYSQL_DATABASE: lldap
+          MYSQL_ROOT_PASSWORD: rootpass
+
+      postgresql:
+         image: postgresql:latest
+         ports:
+           - 5432
+         env:
+           - POSTGRES_USER: lldap
+           - POSTGRES_PASSWORD: lldappass
+           - POSTGRES_DB: lldap
+
+      steps:
+       - name: Download All Artifacts
+         uses: actions/download-artifact@v3
+         with:
+           path: bin/
+       - name: run lldap with postgres DB
+         run: bin/x86_64-unknown-linux-musl-lldap-bin/lldap
+         env:
+           - LLDAP_database_url: postgres://lldap:lldappass@db/lldap
+
+       - name: run lldap with mariadb DB (MySQL Compatible)
+         run: bin/x86_64-unknown-linux-musl-lldap-bin/lldap
+         env:
+           - LLDAP_database_url: mysql://lldapuser:lldappass@db/lldap
+
+
+
+  build-docker-image:
+    needs: [lldap-test]
     name: Build Docker image
     runs-on: ubuntu-latest
     permissions:
