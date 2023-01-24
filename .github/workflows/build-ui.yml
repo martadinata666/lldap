@@ -1,0 +1,35 @@
+name: build ui
+
+on:
+  workflow_call:
+
+jobs:
+  build-ui:
+    runs-on: ubuntu-latest
+    container:
+      image: lldap/rust-dev:latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: |
+            cargo/registry/index
+            cargo/registry/cache
+            cargo/git/db
+            target
+          key: lldap-ui-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            lldap-ui-
+      - name: install wasm-pack via cargo
+        run: |
+             cargo install wasm-pack
+             rustup target add wasm32-unknown-unknown
+      - name: build frontend
+        run: ./app/build.sh
+      - name: check path
+        run: ls -al app/
+      - name: upload ui artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ui
+          path: app/

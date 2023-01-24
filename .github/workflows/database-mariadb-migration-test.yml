@@ -1,0 +1,98 @@
+name: Database MariaDB Migration Test
+on:
+  workflow_call:
+
+jobs:
+  lldap-mariadb-database-migration-test:
+    name: LLDAP mariadb database migration test
+    runs-on: ubuntu-latest
+    services:
+        mariadb:
+           image: mariadb:latest
+           ports:
+             - 3306:3306
+           env:
+             MARIADB_USER: lldapuser
+             MARIADB_PASSWORD: lldappass
+             MARIADB_DATABASE: lldap
+             MARIADB_ROOT_PASSWORD: lldaprootpass
+           options: >-
+             --name mariadb
+             --health-cmd="mariadb-admin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+
+    steps:
+       - name: Download artifacts
+         uses: actions/download-artifact@v3
+         with:
+           name: x86_64-unknown-linux-musl-lldap-bin
+           path: bin/
+       - name: Where is the bin?
+         run: ls -alR bin
+
+       - name: Set executables to LLDAP
+         run: chmod +x bin/lldap
+
+       - name: Install sqlite3
+         run: sudo apt update && sudo apt install -y sqlite3 ldap-utils
+
+       - name: Run lldap with sqlite DB and healthcheck
+         run: |
+              bin/lldap run &
+              sleep 10s
+              bin/lldap healthcheck
+         env:
+           LLDAP_database_url: sqlite://users.db?mode=rwc
+           LLDAP_ldap_port: 3890
+           LLDAP_http_port: 17170
+           LLDAP_LDAP_USER_PASS: ldappass
+           LLDAP_JWT_SECRET: somejwtsecret
+
+       - name: Stop LLDAP sqlite
+         run: pkill lldap
+
+       - name: Export and Converting to mariadb
+         run: |
+              echo "Export to mariadb"
+              sqlite3 ./users.db .dump | grep "^INSERT" | grep -v "^INSERT INTO metdata" > ./mariadb.sql
+              ls -al
+
+       - name: Run lldap with mariadb DB and healthcheck
+         run: |
+              bin/lldap run &
+              sleep 10s
+              bin/lldap healthcheck
+         env:
+           LLDAP_database_url: mysql://lldapuser:lldappass@localhost/lldap
+           LLDAP_ldap_port: 3890
+           LLDAP_http_port: 17170
+           LLDAP_LDAP_USER_PASS: ldappass
+           LLDAP_JWT_SECRET: somejwtsecret
+
+       - name: Stop LLDAP mariadbql
+         run: pkill lldap
+
+       - name: Copy converted db to mariadbs and import
+         run: |
+              docker ps -a
+              docker cp ./mariadb.sql mariadb:/tmp/mariadb.sql
+              docker exec mariadb bash -c "ls /tmp"
+              docker exec mariadb bash -c "mariadb -ulldapuser -plldappass lldap < /tmp/mariadb.sql"
+
+
+       - name: Run lldap with mariadb DB and healthcheck again
+         run: |
+              bin/lldap run &
+              sleep 10s
+              bin/lldap healthcheck
+         env:
+           LLDAP_database_url: mysql://lldapuser:lldappass@localhost/lldap
+           LLDAP_ldap_port: 3890
+           LLDAP_http_port: 17170
+           LLDAP_LDAP_USER_PASS: ldappass
+           LLDAP_JWT_SECRET: somejwtsecret
+
+       - name: Test Admin
+         run: |
+              ldapsearch -H ldap://localhost:3890 -LLL -D "uid=admin,ou=people,dc=example,dc=com" -w 'ldappass' -s "One" -b "ou=people,dc=example,dc=com"
+
+
