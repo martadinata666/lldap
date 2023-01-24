@@ -1,0 +1,331 @@
+name: Docker Static Personal
+
+on:
+  push:
+    branches:
+      - 'personal'
+  release:
+    types:
+      - 'published'
+  pull_request:
+    branches:
+      - 'personal'
+  workflow_dispatch:
+    inputs:
+      msg:
+        description: "Set message"
+        default: "Manual trigger"
+
+env:
+  CARGO_TERM_COLOR: always
+
+# In total 5 jobs, all the jobs are containerized
+# ---
+
+#######################################################################################
+# GitHub actions randomly timeout when downloading musl-gcc                           #
+# Using lldap dev image based on https://hub.docker.com/_/rust and musl-gcc bundled   #
+# Look into .github/workflows/Dockerfile.dev for development image details            #
+#######################################################################################
+
+# build-ui , create/compile the web
+### install wasm
+### install rollup
+### run app/build.sh
+### upload artifacts
+
+# builds-armhf, build-aarch64, build-amd64 create binary for respective arch
+### Add non-native architecture dpkg --add-architecture XXX
+### Install dev tool gcc g++, etc. per respective arch
+### Cargo build
+### Upload artifacts
+
+## the CARGO_ env
+#CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER: arm-linux-gnueabihf-gcc
+# This will determine which architecture lib will be used.
+
+# build-ui,builds-armhf, build-aarch64, build-amd64 will upload artifacts will be used next job
+# build-docker-image job will fetch artifacts and run Dockerfile.ci then push the image.
+
+# cache based on Cargo.lock
+
+jobs:
+  build-ui:
+    runs-on: ubuntu-latest
+    container:
+      image: martadinata666/rust:latest
+      options: --user root
+    steps:
+#      - name: Pull from git
+#        run: |
+#              sudo apt update
+#              sudo apt -y install git
+#              git clone --depth=1 -b personal https://github.com/martadinata666/lldap.git lldap
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: |
+            cargo/registry/index
+            cargo/registry/cache
+            cargo/git/db
+            target
+          key: lldap-ui-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            lldap-ui-
+      - name: install wasm-pack and rollup nodejs
+        run: sudo npm install -g rollup
+             sudo npm install -g wasm-pack
+      - name: build frontend
+        run: ./app/build.sh
+      - name: check path
+        run: ls -al app/
+      - name: upload ui artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ui
+          path: app/
+
+  build-bin:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [armv7-unknown-linux-gnueabihf,aarch64-unknown-linux-musl,x86_64-unknown-linux-musl]
+    container:
+      image: martadinata666/rust:latest
+      options: --user root
+      env:
+        CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER: arm-linux-gnueabihf-gcc
+        CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: aarch64-linux-musl-gcc
+        CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER: x86_64-linux-musl-gcc
+        CARGO_TERM_COLOR: always
+        RUSTFLAGS: -Ctarget-feature=+crt-static
+        CARGO_HOME: ${GITHUB_WORKSPACE}/.cargo
+    steps:
+#      - name: Pull from git
+#        run: |
+#              sudo apt update 
+#              sudo apt install git
+#              git clone --depth=1 -b personal https://github.com/martadinata666/lldap.git lldap
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: |
+            .cargo/registry/index
+            .cargo/registry/cache
+            .cargo/git/db
+            target/
+          key: lldap-bin-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            lldap-bin-${{ matrix.target }}-
+      - name: show my env
+        run: env
+      - name: Add target
+        run: rustup target add ${{ matrix.target }}
+      - name: compile ${{ matrix.target }}
+        run: cargo build --target=${{ matrix.target }} --release -p lldap -p migration-tool
+      - name: check path
+        run: ls -al target/release
+      - name: upload ${{ matrix.target}} lldap artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.target}}-lldap-bin
+          path: target/${{ matrix.target }}/release/lldap
+      - name: upload ${{ matrix.target }} migration tool artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.target }}-migration-tool-bin
+          path: target/${{ matrix.target }}/release/migration-tool
+
+  lldap-test:
+    needs: [build-ui,build-bin]
+    name: LLDAP test
+    runs-on: ubuntu-latest
+    services:
+        mariadb:
+          image: mariadb:latest
+          ports:
+            - 3306:3306
+          env:
+            MYSQL_USER: lldapuser
+            MYSQL_PASSWORD: lldappass
+            MYSQL_DATABASE: lldap
+            MYSQL_ROOT_PASSWORD: rootpass
+
+        postgresql:
+           image: postgres:latest
+           ports:
+             - 5432:5432
+           env:
+             POSTGRES_USER: lldapuser
+             POSTGRES_PASSWORD: lldappass
+             POSTGRES_DB: lldap
+
+    steps:
+       - name: Download All Artifacts
+         uses: actions/download-artifact@v3
+         with:
+           path: bin/
+       - name: Set executables
+         run: chmod +x bin/*/lldap
+       - name: run lldap with postgres DB
+         run: |
+              bin/x86_64-unknown-linux-musl-lldap-bin/lldap run &
+              sleep 10s
+              bin/x86_64-unknown-linux-musl-lldap-bin/lldap healthcheck
+         env:
+           LLDAP_database_url: postgres://lldapuser:lldappass@localhost/lldap
+           LLDAP_ldap_port: 3890
+           LLDAP_http_port: 17170
+
+
+       - name: run lldap with mariadb DB (MySQL Compatible)
+         run: |
+              bin/x86_64-unknown-linux-musl-lldap-bin/lldap run &
+              sleep 10s
+              bin/x86_64-unknown-linux-musl-lldap-bin/lldap healthcheck
+         env:
+           LLDAP_database_url: mysql://lldapuser:lldappass@localhost/lldap
+           LLDAP_ldap_port: 3891
+           LLDAP_http_port: 17171
+
+
+
+  build-docker-image:
+    needs: [lldap-test]
+    name: Build Docker image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        base: [debian]
+        include:
+          - base: debian
+            platforms: linux/amd64,linux/arm64
+
+    steps:
+      - name: fetch repo
+        uses: actions/checkout@v3.3.0
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: bin
+
+      - name: Download llap ui artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: ui
+          path: web
+
+      - name: setup qemu
+        uses: docker/setup-qemu-action@v2
+      - uses: docker/setup-buildx-action@v2
+
+      - name: Docker meta
+        id: metaid
+        uses: docker/metadata-action@v4
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
+            martadinata666/lldap
+          # generate Docker tags based on the following events/attributes
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+      - name: Login to Docker Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+#######################################################
+#### docker image based one metaid steps tag build ####
+#######################################################
+      - name: Build and push latest ${{ matrix.base }}
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          platforms: ${{ matrix.platforms }}
+          file: ./.github/workflows/Dockerfile.ci.${{ matrix.base }}.personal
+          tags: ${{ steps.metaid.outputs.tags }}-${{ matrix.base }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+###############################################################
+### Download artifacts, clean up ui, upload to release page ###
+###############################################################
+  create-release-artifacts:
+  # armv7-unknown-linux-gnueabihf,aarch64-unknown-linux-musl,x86_64-unknown-linux-musl
+     needs: [lldap-test]
+     name: Create release artifacts
+     if: github.event_name == 'release'
+     runs-on: ubuntu-latest
+     steps:
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: bin/
+      - name: Check file
+        run: ls -alR bin/
+      - name: Fixing Filename
+        run: |
+             mv bin/aarch64-unknown-linux-musl-lldap-bin/lldap bin/aarch64-lldap
+             mv bin/x86_64-unknown-linux-musl-lldap-bin/lldap bin/amd64-lldap
+             mv bin/armv7-unknown-linux-gnueabihf-lldap-bin/lldap bin/armhf-lldap
+             mv bin/aarch64-unknown-linux-musl-migration-tool-bin/migration-tool bin/aarch64-migration-tool
+             mv bin/x86_64-unknown-linux-musl-migration-tool-bin/migration-tool bin/amd64-migration-tool
+             mv bin/armv7-unknown-linux-gnueabihf-migration-tool-bin/migration-tool bin/armhf-migration-tool
+             chmod +x bin/*-lldap
+             chmod +x bin/*-migration-tool
+      - name: Download llap ui artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: ui
+          path: web
+      - name: Web Cleanup
+        run: mkdir app && mv web/index_local.html app/index.html && mv web/static app/static && mv web/pkg app/pkg
+      - name: Fetch web components
+        run: |
+             sudo apt update
+             sudo apt install wget
+             for file in $(cat app/static/libraries.txt); do wget -P app/static "$file"; done
+             for file in $(cat app/static/fonts/fonts.txt); do wget -P app/static/fonts "$file"; done
+             chmod a+r -R .
+      - name: Setup LLDAP dir for packing
+        run: |
+             mkdir aarch64-lldap
+             mkdir amd64-lldap
+             mkdir armhf-lldap
+             mv bin/aarch64-lldap aarch64-lldap/lldap
+             mv bin/amd64-lldap amd64-lldap/lldap
+             mv bin/armhf-lldap armhf-lldap/lldap
+             mv bin/aarch64-migration-tool aarch64-lldap/migration-tool
+             mv bin/amd64-migration-tool amd64-lldap/migration-tool
+             mv bin/armhf-migration-tool armhf-lldap/migration-tool
+             cp -r app aarch64-lldap/
+             cp -r app amd64-lldap/
+             cp -r app armhf-lldap/
+             ls -alR aarch64-lldap/
+             ls -alR amd64-lldap/
+             ls -alR armhf-lldap/
+      - name: Compress
+        run: |
+             tar -czvf aarch64-lldap.tar.gz aarch64-lldap/
+             tar -czvf amd64-lldap.tar.gz amd64-lldap/
+             tar -czvf armhf-lldap.tar.gz armhf-lldap/
+      - name: Upload artifacts release
+        uses: ncipollo/release-action@v1
+        id: create_release
+        with:
+          allowUpdates: true
+          artifacts:  aarch64-lldap.tar.gz,
+                      amd64-lldap.tar.gz,
+                      armhf-lldap.tar.gz
+        env:
+         GITHUB_TOKEN: ${{ github.token }}
