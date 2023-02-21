@@ -1,0 +1,103 @@
+name: Database Migration Test
+on:
+  workflow_call:
+  push:
+    branches:
+      - personal
+
+jobs:
+  build-binary:
+    uses: ./.github/workflows/docker-build-static-personal.yml
+
+
+  lldap-postgres-database-migration-test:
+    needs: [build-binary]
+    name: LLDAP postgres database migration test
+    runs-on: ubuntu-latest
+    services:
+        postgresql:
+           image: postgres:latest
+           ports:
+             - 5432:5432
+           env:
+             POSTGRES_USER: lldapuser
+             POSTGRES_PASSWORD: lldappass
+             POSTGRES_DB: lldap
+           options: --name postgresql
+
+    steps:
+       - name: Download artifacts
+         uses: actions/download-artifact@v3
+         with:
+           name: x86_64-unknown-linux-musl-lldap-bin
+           path: bin/
+       - name: Where is the bin?
+         run: ls -alR bin
+
+       - name: Set executables to LLDAP
+         run: chmod +x bin/lldap
+
+       - name: Install sqlite3
+         run: sudo apt update && sudo apt install -y sqlite3 ldap-utils
+
+       - name: Run lldap with sqlite DB and healthcheck
+         run: |
+              bin/lldap run &
+              sleep 10s
+              bin/lldap healthcheck
+         env:
+           LLDAP_database_url: sqlite://users.db?mode=rwc
+           LLDAP_ldap_port: 3890
+           LLDAP_http_port: 17170
+           LLDAP_LDAP_USER_PASS: ldappass
+           LLDAP_JWT_SECRET: somejwtsecret
+
+       - name: Stop LLDAP sqlite
+         run: pkill lldap
+
+       - name: Export and Converting to Postgress
+         run: |
+              echo "Export to postgres"
+              sqlite3 ./users.db .dump | sed -r -e "s/X'([[:xdigit:]]+'[^'])/'\\\x\\1/g" -e 's/^CREATE TABLE IF NOT EXISTS "([^"]*)".*/DELETE FROM \1;/' -e '/^PRAGMA.*/d' > ./psql.sql
+              ls -al
+
+       - name: Run lldap with postgres DB and healthcheck
+         run: |
+              bin/lldap run &
+              sleep 10s
+              bin/lldap healthcheck
+         env:
+           LLDAP_database_url: postgres://lldapuser:lldappass@localhost/lldap
+           LLDAP_ldap_port: 3892
+           LLDAP_http_port: 17172
+           LLDAP_LDAP_USER_PASS: ldappass
+           LLDAP_JWT_SECRET: somejwtsecret
+
+       - name: Stop LLDAP postgresql
+         run: pkill lldap
+
+       - name: Copy converted db to postgress and import
+         run: |
+              docker ps -a
+              docker cp ./psql.sql postgresql:/tmp/psql.sql
+              docker exec postgresql bash -c "ls /tmp"
+              docker exec postgresql bash -c "psql -U lldapuser -d lldap < /tmp/psql.sql"
+
+
+       - name: Run lldap with postgres DB and healthcheck again
+         run: |
+              bin/lldap run &
+              sleep 10s
+              bin/lldap healthcheck
+         env:
+           LLDAP_database_url: postgres://lldapuser:lldappass@localhost/lldap
+           LLDAP_ldap_port: 3890
+           LLDAP_http_port: 17170
+           LLDAP_LDAP_USER_PASS: ldappass
+           LLDAP_JWT_SECRET: somejwtsecret
+
+       - name: Test Admin
+         run: |
+              ldapsearch -H ldap://localhost:3890 -LLL -D "uid=admin,ou=people,dc=example,dc=com" -w 'ldappass' -s "One" -b "ou=people,dc=example,dc=com"
+
+
