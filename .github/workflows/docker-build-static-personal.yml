@@ -246,16 +246,16 @@ jobs:
 #######################################################
 #### docker image based one metaid steps tag build ####
 #######################################################
-      - name: Build and push latest ${{ matrix.base }}
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          push: ${{ github.event_name != 'pull_request' }}
-          platforms: ${{ matrix.platforms }}
-          file: ./.github/workflows/Dockerfile.ci.${{ matrix.base }}.personal
-          tags: ${{ steps.metaid.outputs.tags }}-${{ matrix.base }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+#      - name: Build and push latest ${{ matrix.base }}
+#        uses: docker/build-push-action@v3
+#        with:
+#          context: .
+#          push: ${{ github.event_name != 'pull_request' }}
+#          platforms: ${{ matrix.platforms }}
+#          file: ./.github/workflows/Dockerfile.ci.${{ matrix.base }}.personal
+#          tags: ${{ steps.metaid.outputs.tags }}-${{ matrix.base }}
+#          cache-from: type=gha
+#          cache-to: type=gha,mode=max
 
 ###############################################################
 ### Download artifacts, clean up ui, upload to release page ###
