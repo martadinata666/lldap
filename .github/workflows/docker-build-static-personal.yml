@@ -56,10 +56,10 @@ jobs:
       image: martadinata666/rust:latest
       options: --user root
     steps:
-#      - name: Pull from git
-#        run: |
-#              sudo apt update
-#              sudo apt -y install git
+      - name: Pull from git
+        run: |
+              sudo apt update
+              sudo apt -y install gzip
 #              git clone --depth=1 -b personal https://github.com/martadinata666/lldap.git lldap
       - uses: actions/checkout@v3
       - uses: actions/cache@v3
