@@ -58,7 +58,7 @@ jobs:
        - name: Export and Converting to Postgress
          run: |
               echo "Export to postgres"
-              sqlite3 ./users.db .dump | sed -r -e "s/X'([[:xdigit:]]+'[^'])/'\\\x\\1/g" -e 's/^CREATE TABLE IF NOT EXISTS "([^"]*)".*/DELETE FROM \1;/' -e '/^PRAGMA.*/d' > ./psql.sql
+              sqlite3 ./users.db .dump | grep "^INSERT" | grep -v "^INSERT INTO metadata" > ./psql.sql
               ls -al
 
        - name: Run lldap with postgres DB and healthcheck
