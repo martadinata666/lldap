@@ -62,21 +62,6 @@ jobs:
               sqlite3 ./users.db .dump | grep "^INSERT" > ./mariadb.sql
               ls -al
 
-       - name: Run lldap with mariadb DB and healthcheck
-         run: |
-              bin/lldap run &
-              sleep 10s
-              bin/lldap healthcheck
-         env:
-           LLDAP_database_url: mysql://lldapuser:lldappass@localhost/lldap
-           LLDAP_ldap_port: 3890
-           LLDAP_http_port: 17170
-           LLDAP_LDAP_USER_PASS: ldappass
-           LLDAP_JWT_SECRET: somejwtsecret
-
-       - name: Stop LLDAP mariadbql
-         run: pkill lldap
-
        - name: Copy converted db to mariadbs and import
          run: |
               docker ps -a
@@ -85,7 +70,7 @@ jobs:
               docker exec mariadb bash -c "mariadb -ulldapuser -plldappass lldap < /tmp/mariadb.sql"
 
 
-       - name: Run lldap with mariadb DB and healthcheck again
+       - name: Run lldap with mariadb DB and healthcheck
          run: |
               bin/lldap run &
               sleep 10s
