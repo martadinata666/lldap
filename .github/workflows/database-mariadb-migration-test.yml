@@ -22,7 +22,7 @@ jobs:
            env:
              MARIADB_USER: lldapuser
              MARIADB_PASSWORD: lldappass
-             MARIADB_DB: lldap
+             MARIADB_DATABASE: lldap
              MARIADB_ROOT_PASSWORD: lldaprootpass
            options: --name mariadb
 
@@ -69,8 +69,8 @@ jobs:
               bin/lldap healthcheck
          env:
            LLDAP_database_url: mysql://lldapuser:lldappass@localhost/lldap
-           LLDAP_ldap_port: 3892
-           LLDAP_http_port: 17172
+           LLDAP_ldap_port: 3890
+           LLDAP_http_port: 17170
            LLDAP_LDAP_USER_PASS: ldappass
            LLDAP_JWT_SECRET: somejwtsecret
 
