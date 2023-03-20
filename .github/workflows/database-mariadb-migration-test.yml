@@ -81,8 +81,8 @@ jobs:
          run: |
               docker ps -a
               docker cp ./mariadb.sql mariadb:/tmp/mariadb.sql
-              docker exec mariadbql bash -c "ls /tmp"
-              docker exec mariadbql bash -c "mariadb -U lldapuser -plldappass lldap < /tmp/mariadb.sql"
+              docker exec mariadb bash -c "ls /tmp"
+              docker exec mariadb bash -c "mariadb -U lldapuser -plldappass lldap < /tmp/mariadb.sql"
 
 
        - name: Run lldap with mariadb DB and healthcheck again
@@ -91,7 +91,7 @@ jobs:
               sleep 10s
               bin/lldap healthcheck
          env:
-           LLDAP_database_url: mariadb://lldapuser:lldappass@localhost/lldap
+           LLDAP_database_url: mysql://lldapuser:lldappass@localhost/lldap
            LLDAP_ldap_port: 3890
            LLDAP_http_port: 17170
            LLDAP_LDAP_USER_PASS: ldappass
