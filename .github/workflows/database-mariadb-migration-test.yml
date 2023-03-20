@@ -82,7 +82,7 @@ jobs:
               docker ps -a
               docker cp ./mariadb.sql mariadb:/tmp/mariadb.sql
               docker exec mariadb bash -c "ls /tmp"
-              docker exec mariadb bash -c "mariadb -U lldapuser -plldappass lldap < /tmp/mariadb.sql"
+              docker exec mariadb bash -c "mariadb -ulldapuser -plldappass lldap < /tmp/mariadb.sql"
 
 
        - name: Run lldap with mariadb DB and healthcheck again
