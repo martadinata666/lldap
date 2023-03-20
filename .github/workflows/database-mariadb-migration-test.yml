@@ -59,7 +59,7 @@ jobs:
        - name: Export and Converting to mariadb
          run: |
               echo "Export to mariadb"
-              sqlite3 ./users.db .dump | grep "^INSERT" > ./mariadb.sql
+              sqlite3 ./users.db .dump | grep "^INSERT" | grep -v "^INSERT INTO metdata" > ./mariadb.sql
               ls -al
 
        - name: Run lldap with mariadb DB and healthcheck
