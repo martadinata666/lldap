@@ -1,4 +1,4 @@
-name: Database Migration Test
+name: Database MariaDB Migration Test
 on:
   workflow_call:
   push:
@@ -10,20 +10,21 @@ jobs:
     uses: ./.github/workflows/docker-build-static-personal.yml
 
 
-  lldap-postgres-database-migration-test:
+  lldap-mariadb-database-migration-test:
     needs: [build-binary]
-    name: LLDAP postgres database migration test
+    name: LLDAP mariadb database migration test
     runs-on: ubuntu-latest
     services:
-        postgresql:
-           image: postgres:latest
+        mariadb:
+           image: mariadb:latest
            ports:
-             - 5432:5432
+             - 3306:3306
            env:
-             POSTGRES_USER: lldapuser
-             POSTGRES_PASSWORD: lldappass
-             POSTGRES_DB: lldap
-           options: --name postgresql
+             MARIADB_USER: lldapuser
+             MARIADB_PASSWORD: lldappass
+             MARIADB_DB: lldap
+             MARIADB_ROOT_PASSWORD: lldaprootpass
+           options: --name mariadb
 
     steps:
        - name: Download artifacts
@@ -55,42 +56,42 @@ jobs:
        - name: Stop LLDAP sqlite
          run: pkill lldap
 
-       - name: Export and Converting to Postgress
+       - name: Export and Converting to mariadb
          run: |
-              echo "Export to postgres"
-              sqlite3 ./users.db .dump | sed -r -e "s/X'([[:xdigit:]]+'[^'])/'\\\x\\1/g" -e 's/^CREATE TABLE IF NOT EXISTS "([^"]*)".*/DELETE FROM \1;/' -e '/^PRAGMA.*/d' > ./psql.sql
+              echo "Export to mariadb"
+              sqlite3 ./users.db .dump | grep "^INSERT" > ./mariadb.sql
               ls -al
 
-       - name: Run lldap with postgres DB and healthcheck
+       - name: Run lldap with mariadb DB and healthcheck
          run: |
               bin/lldap run &
               sleep 10s
               bin/lldap healthcheck
          env:
-           LLDAP_database_url: postgres://lldapuser:lldappass@localhost/lldap
+           LLDAP_database_url: mysql://lldapuser:lldappass@localhost/lldap
            LLDAP_ldap_port: 3892
            LLDAP_http_port: 17172
            LLDAP_LDAP_USER_PASS: ldappass
            LLDAP_JWT_SECRET: somejwtsecret
 
-       - name: Stop LLDAP postgresql
+       - name: Stop LLDAP mariadbql
          run: pkill lldap
 
-       - name: Copy converted db to postgress and import
+       - name: Copy converted db to mariadbs and import
          run: |
               docker ps -a
-              docker cp ./psql.sql postgresql:/tmp/psql.sql
-              docker exec postgresql bash -c "ls /tmp"
-              docker exec postgresql bash -c "psql -U lldapuser -d lldap < /tmp/psql.sql"
+              docker cp ./mariadb.sql mariadb:/tmp/mariadb.sql
+              docker exec mariadbql bash -c "ls /tmp"
+              docker exec mariadbql bash -c "mariadb -U lldapuser -plldappass lldap < /tmp/mariadb.sql"
 
 
-       - name: Run lldap with postgres DB and healthcheck again
+       - name: Run lldap with mariadb DB and healthcheck again
          run: |
               bin/lldap run &
               sleep 10s
               bin/lldap healthcheck
          env:
-           LLDAP_database_url: postgres://lldapuser:lldappass@localhost/lldap
+           LLDAP_database_url: mariadb://lldapuser:lldappass@localhost/lldap
            LLDAP_ldap_port: 3890
            LLDAP_http_port: 17170
            LLDAP_LDAP_USER_PASS: ldappass
