@@ -29,9 +29,9 @@ jobs:
              mv bin/aarch64-unknown-linux-musl-migration-tool-bin/migration-tool bin/aarch64-migration-tool
              mv bin/x86_64-unknown-linux-musl-migration-tool-bin/migration-tool bin/amd64-migration-tool
              mv bin/armv7-unknown-linux-gnueabihf-migration-tool-bin/migration-tool bin/armhf-migration-tool
-             mv bin/aarch64-unknown-linux-musl-lldap-bin/lldap_set_password bin/aarch64-lldap_set_password
-             mv bin/x86_64-unknown-linux-musl-lldap-bin/lldap_set_password bin/amd64-lldap_set_password
-             mv bin/armv7-unknown-linux-gnueabihf-lldap-bin/lldap_set_password bin/armhf-lldap_set_password
+             mv bin/aarch64-unknown-linux-musl-lldap-set-password-bin/lldap_set_password bin/aarch64-lldap_set_password
+             mv bin/x86_64-unknown-linux-musl-lldap-set-password-bin/lldap_set_password bin/amd64-lldap_set_password
+             mv bin/armv7-unknown-linux-gnueabihf-lldap-set-password-bin/lldap_set_password bin/armhf-lldap_set_password
              chmod +x bin/*-lldap
              chmod +x bin/*-migration-tool
              chmod +x bin/*-lldap_set_password
