@@ -104,7 +104,7 @@ jobs:
       - name: Add target
         run: rustup target add ${{ matrix.target }}
       - name: compile ${{ matrix.target }}
-        run: cargo build --target=${{ matrix.target }} --release -p lldap -p migration-tool
+        run: cargo build --target=${{ matrix.target }} --release -p lldap -p migration-tool -p lldap_set_password
       - name: check path
         run: ls -al target/release
       - name: upload ${{ matrix.target}} lldap artifacts
@@ -117,4 +117,9 @@ jobs:
         with:
           name: ${{ matrix.target }}-migration-tool-bin
           path: target/${{ matrix.target }}/release/migration-tool
+      - name: upload ${{ matrix.target }}-set-password
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrixx.target }}/release/lldap_set_password
+          path: target/${{ matrix.target }}/release/lldap_set_password
 
