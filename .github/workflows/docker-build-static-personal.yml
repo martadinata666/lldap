@@ -120,6 +120,6 @@ jobs:
       - name: upload ${{ matrix.target }}-set-password
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrixx.target }}/release/lldap_set_password
+          name: ${{ matrix.target }}/release/lldap_set_password
           path: target/${{ matrix.target }}/release/lldap_set_password
 
