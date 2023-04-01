@@ -136,6 +136,7 @@ fn get_tls_acceptor(config: &Configuration) -> Result<RustlsTlsAcceptor> {
     let server_config = std::sync::Arc::new(
         ServerConfig::builder()
             .with_safe_defaults()
+            .with_safe_default_protocol_versions()
             .with_no_client_auth()
             .with_single_cert(certs, private_key)?,
     );
