@@ -1,2 +1,2 @@
 FROM nitnelave/lldap:latest
-LLDAP_LDAP_USER_PASS=admindemo
+ENV LLDAP_LDAP_USER_PASS=admindemo
