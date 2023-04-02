@@ -3,6 +3,10 @@ name: Docker Static Personal
 on:
   workflow_call:
   push:
+    paths-ignore:
+      - 'docs/**'
+      - 'example_configs/**'
+      - '*.md'
     branches:
       - "personal"
 
