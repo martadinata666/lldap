@@ -80,7 +80,7 @@ truth for users, via LDAP.
 By default, the data is stored in SQLite, but you can swap the backend with
 MySQL/MariaDB or PostgreSQL.
 
-Look on demo here https://lldap-production.up.railway.app
+Look on demo here https://lldap-production.up.railway.app or http://lldap-dedyms.p.projectsegfau.lt
 
 ## Installation
 
