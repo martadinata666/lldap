@@ -1,0 +1,16 @@
+name: Segfault Deployment
+on: [push]
+  branches:
+    - personal
+jobs:
+  build:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy nitnelave/lldap:latest 
+      uses: appleboy/ssh-action@v0.1.9
+      with:
+        host: p.projectsegfau.lt
+        username: ${{ secrets.SEGFAULT_USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        script: ~/docker/lldap/run-lldap.sh
