@@ -3,6 +3,10 @@ on:
   push:
     branches:
       - personal
+    paths-ignore:
+      - '*.md'
+      - 'docs/*md'
+      - 'example_configs/*.md'
 jobs:
   build:
     name: Deploy
@@ -14,4 +18,6 @@ jobs:
         host: p.projectsegfau.lt
         username: ${{ secrets.SEGFAULT_USERNAME }}
         key: ${{ secrets.SSH_KEY }}
-        script: ~/docker/lldap/run-lldap.sh
+        script: |
+                ~/docker/lldap/run-lldap.sh
+                ~/docker/lldap/run-llap-n.sh
