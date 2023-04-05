@@ -1,7 +1,8 @@
 name: Segfault Deployment
-on: [push]
-  branches:
-    - personal
+on:
+  push:
+    branches:
+      - personal
 jobs:
   build:
     name: Deploy
