@@ -23,7 +23,7 @@ branch = 'zeroize_1.5'
 git = 'https://github.com/inejge/ldap3/'
 
 [package.metadata.deb]
-name = lldap
+name = "lldap"
 version = "0.5.0-alpha"
 maintainer = "Dedy MS <dedyms@proton.me>"
 copyright = "2023, Dedy MS <dedyms@proton.me>"
