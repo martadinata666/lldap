@@ -24,18 +24,4 @@ branch = 'zeroize_1.5'
 [patch.crates-io.lber]
 git = 'https://github.com/inejge/ldap3/'
 
-[package.metadata.deb]
-maintainer = "Dedy MS <dedyms@proton.me>"
-copyright = "2023, Dedy MS <dedyms@proton.me>"
-license-file = ["LICENSE", "4"]
-extended-description = """\
-A simple ldap implementation with rust."""
-depends = "$auto"
-section = "utility"
-priority = "optional"
-assets = [
-    ["target/release/cargo-deb", "usr/local/bin/lldap", "755"],
-    ["app", "usr/local/bin/lldap/app", "755"],
-    ["lldap_config.docker_template.toml", "usr/local/bin/lldap/lldap_config.toml", "644"],
-    ["README.md", "usr/share/doc/cargo-deb/README", "644"],
-]
+
