@@ -30,10 +30,9 @@ jobs:
           key: lldap-bin-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             lldap-bin-${{ matrix.target }}-
-      - name: show my env
-        run: env
+        
       - name: Install build package
-        run: apk add build-base
+        run: apk add build-base rust rustup
         
       - name: Add target
         run: rustup target add ${{ matrix.target }}
