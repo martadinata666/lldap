@@ -32,10 +32,13 @@ jobs:
             lldap-bin-${{ matrix.target }}-
         
       - name: Install build package
-        run: apk add build-base rust rustup
+        run: apk add build-base rust curl
+        
+      - name: Install rustup
+        run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
         
       - name: Add target
-        run: rustup-init target add ${{ matrix.target }}
+        run: rustup target add ${{ matrix.target }}
 
       - name: compile ${{ matrix.target }}
         run: cargo build --target=${{ matrix.target }} --release -p lldap -p migration-tool -p lldap_set_password
