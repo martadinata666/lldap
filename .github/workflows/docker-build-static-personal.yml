@@ -9,35 +9,6 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
-# In total 5 jobs, all the jobs are containerized
-# ---
-
-#######################################################################################
-# GitHub actions randomly timeout when downloading musl-gcc                           #
-# Using lldap dev image based on https://hub.docker.com/_/rust and musl-gcc bundled   #
-# Look into .github/workflows/Dockerfile.dev for development image details            #
-#######################################################################################
-
-# build-ui , create/compile the web
-### install wasm
-### install rollup
-### run app/build.sh
-### upload artifacts
-
-# builds-armhf, build-aarch64, build-amd64 create binary for respective arch
-### Add non-native architecture dpkg --add-architecture XXX
-### Install dev tool gcc g++, etc. per respective arch
-### Cargo build
-### Upload artifacts
-
-## the CARGO_ env
-#CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER: arm-linux-gnueabihf-gcc
-# This will determine which architecture lib will be used.
-
-# build-ui,builds-armhf, build-aarch64, build-amd64 will upload artifacts will be used next job
-# build-docker-image job will fetch artifacts and run Dockerfile.ci then push the image.
-
-# cache based on Cargo.lock
 
 jobs:
   build-ui:
@@ -109,7 +80,7 @@ jobs:
         run: rustup target add ${{ matrix.target }}
 
       - name: compile ${{ matrix.target }}
-        run: cargo build --target=${{ matrix.target }} --release -p lldap -p migration-tool -p lldap_set_password
+        run: cargo build --target=${{ matrix.target }} --release -p lldap -p migration_tool -p lldap_set_password
 
       - name: check path
         run: ls -alr target/release
