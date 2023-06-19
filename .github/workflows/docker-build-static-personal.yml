@@ -37,7 +37,9 @@ jobs:
              cargo install wasm-pack
              rustup target add wasm32-unknown-unknown
       - name: build frontend
-        run: ./app/build.sh
+        run: |
+             cd app
+             wasm-pack build --target web --release -- --offline
       - name: check path
         run: ls -al app/
       - name: upload ui artifacts
