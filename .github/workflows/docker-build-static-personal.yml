@@ -55,14 +55,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        target: [armv7-unknown-linux-gnueabihf,aarch64-unknown-linux-musl,x86_64-unknown-linux-musl]
+        target: [armv7-unknown-linux-musleabihf,aarch64-unknown-linux-musl,x86_64-unknown-linux-musl]
     container:
       image: martadinata666/rust:latest
       options: --user root
       env:
-        CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER: arm-linux-gnueabihf-gcc
-        CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: aarch64-linux-musl-gcc
-        CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER: x86_64-linux-musl-gcc
         CARGO_TERM_COLOR: always
         RUSTFLAGS: -Ctarget-feature=+crt-static
         CARGO_HOME: ${GITHUB_WORKSPACE}/.cargo
