@@ -37,12 +37,14 @@ jobs:
         run: |
              cargo install wasm-pack
              rustup target add wasm32-unknown-unknown
+
+#             wasm-pack build --target web --release --mode no-install -- --offline
       - name: build frontend
         env:
           RUST_LOG: "debug"
         run: |
              cd app
-             wasm-pack build --target web --release --mode no-install -- --offline
+             ./build.sh
       - name: check path
         run: ls -al app/
       - name: upload ui artifacts
