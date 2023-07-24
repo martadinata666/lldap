@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Deploy nitnelave/lldap:latest 
-      uses: appleboy/ssh-action@v0.1.9
+      uses: appleboy/ssh-action@v1.0.0
       with:
         host: p.projectsegfau.lt
         username: ${{ secrets.SEGFAULT_USERNAME }}
