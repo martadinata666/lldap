@@ -89,7 +89,7 @@ jobs:
       image: nitnelave/rust-dev:latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3.5.3
+        uses: actions/checkout@v4
       - uses: actions/cache@v3
         with:
           path: |
@@ -138,7 +138,7 @@ jobs:
         CARGO_HOME: ${GITHUB_WORKSPACE}/.cargo
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3.5.3
+        uses: actions/checkout@v4
       - uses: actions/cache@v3
         with:
           path: |
@@ -300,7 +300,7 @@ jobs:
 
     steps:
        - name: Checkout scripts
-         uses: actions/checkout@v3.5.3
+         uses: actions/checkout@v4
          with:
            sparse-checkout: 'scripts'
 
@@ -477,7 +477,7 @@ jobs:
       packages: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3.5.3
+        uses: actions/checkout@v4
       - name: Download all artifacts
         uses: actions/download-artifact@v3
         with:
