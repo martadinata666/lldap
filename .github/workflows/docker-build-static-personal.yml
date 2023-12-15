@@ -48,7 +48,7 @@ jobs:
       - name: check path
         run: ls -al app/
       - name: upload ui artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ui
           path: app/
@@ -90,19 +90,19 @@ jobs:
         run: ls -alr target/release
 
       - name: upload ${{ matrix.target}} lldap artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target}}-lldap-bin
           path: target/${{ matrix.target }}/release/lldap
 
       - name: upload ${{ matrix.target }} migration tool artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target }}-migration-tool-bin
           path: target/${{ matrix.target }}/release/migration-tool
 
       - name: upload ${{ matrix.target }}-set-password-bin
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target }}-lldap-set-password-bin
           path: target/${{ matrix.target }}/release/lldap_set_password
