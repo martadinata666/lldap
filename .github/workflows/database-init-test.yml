@@ -1,9 +1,6 @@
 name: Database Init Test
 on:
   workflow_call:
-  push:
-    branches:
-      - personal
 
 jobs:
   build-binary:
