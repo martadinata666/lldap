@@ -1,15 +1,8 @@
 name: Database Postgres Migration Test
 on:
   workflow_call:
-  push:
-    branches:
-      - personal
 
 jobs:
-  build-binary:
-    uses: ./.github/workflows/docker-build-static-personal.yml
-
-
   lldap-postgres-database-migration-test:
     needs: [build-binary]
     name: LLDAP postgres database migration test

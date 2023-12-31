@@ -107,3 +107,9 @@ jobs:
           name: ${{ matrix.target }}-lldap-set-password-bin
           path: target/${{ matrix.target }}/release/lldap_set_password
 
+      - mariadb-database-migrations-test:
+        uses: ./.github/workflows/database-mariadb-migration-test.yml
+
+      - postgress-database-migrations-test:
+        uses: ./.github/workflows/database-postgres-migration-test.yml
+
