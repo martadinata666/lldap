@@ -56,27 +56,34 @@ jobs:
   build-bin:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
       - name: Build Triplet
         uses: ./.github/workflows/build-bin.yml
 
   migration-test:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
       - name: mariadb-database-migrations-test
         uses: ./.github/workflows/database-mariadb-migration-test.yml
-
       - name: postgres-database-migrations-test
         uses: ./.github/workflows/database-postgres-migration-test.yml
 
   init-test:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
       - name: database init test
         uses: ./.github/workflows/database-init-test.yml
 
   segfault-deployment:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
       - name: deploy segfault
         uses: ./.github/workflows/segfault-deployment.yml
 
