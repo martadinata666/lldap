@@ -4,7 +4,7 @@ on:
 
 jobs:
   lldap-postgres-database-migration-test:
-    needs: [build-binary]
+    needs: [build-bin]
     name: LLDAP postgres database migration test
     runs-on: ubuntu-latest
     services:
