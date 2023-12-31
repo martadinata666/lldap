@@ -107,9 +107,27 @@ jobs:
           name: ${{ matrix.target }}-lldap-set-password-bin
           path: target/${{ matrix.target }}/release/lldap_set_password
 
+  migration-test:
+    runs-on: ubuntu-latest
+    needs: [build-bin,build-ui]
+    steps:
       - name: mariadb-database-migrations-test
         uses: ./.github/workflows/database-mariadb-migration-test.yml
 
       - name: postgres-database-migrations-test
         uses: ./.github/workflows/database-postgres-migration-test.yml
+
+  init-test:
+    runs-on: ubuntu-latest
+    needs: [build-bin,build-ui]
+    steps:
+      - name: database init test
+        uses: ./.github/workflows/database-init-test.yml
+
+  segfault-deployment:
+    runs-on: ubuntu-latest
+    needs: [build-bin,build-ui]
+    steps:
+      - name: deploy segfault
+        uses: ./.github/workflows/segfault-deployment.yml
 

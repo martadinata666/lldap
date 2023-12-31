@@ -1,18 +1,13 @@
 name: Segfault Deployment
 on:
-  push:
-    branches:
-      - personal
-    paths-ignore:
-      - '*.md'
-      - 'docs/*md'
-      - 'example_configs/*.md'
+  workflow_call:
+
 jobs:
   build:
     name: Deploy
     runs-on: ubuntu-latest
     steps:
-    - name: Deploy nitnelave/lldap:latest 
+    - name: Deploy nitnelave/lldap:latest
       uses: appleboy/ssh-action@v0.1.9
       with:
         host: p.projectsegfau.lt
