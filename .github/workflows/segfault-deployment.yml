@@ -1,0 +1,17 @@
+name: Segfault Deployment
+on:
+  workflow_call:
+
+jobs:
+  build:
+    name: Deploy
+    steps:
+    - name: Deploy nitnelave/lldap:latest
+      uses: appleboy/ssh-action@v0.1.9
+      with:
+        host: p.projectsegfau.lt
+        username: ${{ secrets.SEGFAULT_USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        script: |
+                ~/docker/lldap/run-lldap.sh
+                ~/docker/lldap/run-lldap-n.sh

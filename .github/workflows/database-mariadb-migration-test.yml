@@ -1,17 +1,10 @@
 name: Database MariaDB Migration Test
 on:
   workflow_call:
-  push:
-    branches:
-      - personal
 
 jobs:
-  build-binary:
-    uses: ./.github/workflows/docker-build-static-personal.yml
-
-
   lldap-mariadb-database-migration-test:
-    needs: [build-binary]
+    needs: [build-bin]
     name: LLDAP mariadb database migration test
     runs-on: ubuntu-latest
     services:
@@ -28,7 +21,7 @@ jobs:
 
     steps:
        - name: Download artifacts
-         uses: actions/download-artifact@v3
+         uses: actions/download-artifact@v4
          with:
            name: x86_64-unknown-linux-musl-lldap-bin
            path: bin/
