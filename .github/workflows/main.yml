@@ -1,0 +1,16 @@
+name: Database Init Test
+on:
+  workflow_call:
+  push:
+    branches:
+      - personal
+
+jobs:
+  build-binary:
+    uses: ./.github/workflows/build-binary.yml
+
+  build-ui:
+    uses: ./.github/workflows/build-ui.yml
+
+  lldap-init-test:
+    uses: ./.github/workflows/database-init-test.yml
