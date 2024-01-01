@@ -4,7 +4,6 @@ on:
 
 jobs:
   lldap-init-test:
-    needs: [build-binary,build-ui]
     name: LLDAP database init test
     runs-on: ubuntu-latest
     services:
