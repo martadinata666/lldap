@@ -1,17 +1,10 @@
 name: Database MariaDB Migration Test
 on:
   workflow_call:
-  push:
-    branches:
-      - personal
 
 jobs:
-  build-binary:
-    uses: ./.github/workflows/docker-build-static-personal.yml
-
-
   lldap-mariadb-database-migration-test:
-    needs: [build-binary]
+    needs: [build-bin]
     name: LLDAP mariadb database migration test
     runs-on: ubuntu-latest
     services:
