@@ -55,16 +55,6 @@ jobs:
 
   build-bin:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        target: [armv7-unknown-linux-musleabihf,aarch64-unknown-linux-musl,x86_64-unknown-linux-musl]
-    container:
-      image: martadinata666/rust:latest
-      options: --user root
-      env:
-        CARGO_TERM_COLOR: always
-        RUSTFLAGS: -Ctarget-feature=+crt-static
-        CARGO_HOME: ${GITHUB_WORKSPACE}/.cargo
     uses: ./.github/workflows/build-bin.yml
 
   mariadb-migration-test:
