@@ -54,36 +54,31 @@ jobs:
           path: app/
 
   build-bin:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4.1.1
-      - name: Build Triplet
-        uses: ./.github/workflows/build-bin.yml
+    strategy:
+      matrix:
+        target: [armv7-unknown-linux-musleabihf,aarch64-unknown-linux-musl,x86_64-unknown-linux-musl]
+    container:
+      image: martadinata666/rust:latest
+      options: --user root
+      env:
+        CARGO_TERM_COLOR: always
+        RUSTFLAGS: -Ctarget-feature=+crt-static
+        CARGO_HOME: ${GITHUB_WORKSPACE}/.cargo
+    uses: ./.github/workflows/build-bin.yml
 
-  migration-test:
+  mariadb-migration-test:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4.1.1
-      - name: mariadb-database-migrations-test
-        uses: ./.github/workflows/database-mariadb-migration-test.yml
-      - name: postgres-database-migrations-test
-        uses: ./.github/workflows/database-postgres-migration-test.yml
+    uses: ./.github/workflows/database-mariadb-migration-test.yml
+
+  postgres-migration-test:
+    runs-on: ubuntu-latest
+    uses: ./.github/workflows/database-postgres-migration-test.yml
 
   init-test:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4.1.1
-      - name: database init test
-        uses: ./.github/workflows/database-init-test.yml
+    uses: ./.github/workflows/database-init-test.yml
 
   segfault-deployment:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4.1.1
-      - name: deploy segfault
-        uses: ./.github/workflows/segfault-deployment.yml
+    uses: ./.github/workflows/segfault-deployment.yml
 
