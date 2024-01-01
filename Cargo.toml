@@ -23,3 +23,5 @@ branch = 'zeroize_1.5'
 
 [patch.crates-io.lber]
 git = 'https://github.com/inejge/ldap3/'
+
+
