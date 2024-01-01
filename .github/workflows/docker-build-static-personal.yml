@@ -48,7 +48,7 @@ jobs:
       - name: check path
         run: ls -al app/
       - name: upload ui artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ui
           path: app/
