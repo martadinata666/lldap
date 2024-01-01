@@ -13,4 +13,5 @@ jobs:
     uses: ./.github/workflows/build-ui.yml
 
   lldap-init-test:
+    needs: [build-ui,build-binary]
     uses: ./.github/workflows/database-init-test.yml
