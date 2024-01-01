@@ -1,4 +1,5 @@
-name: Build UI
+name: build ui
+
 on:
   workflow_call:
 
