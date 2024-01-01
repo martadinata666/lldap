@@ -10,7 +10,7 @@ jobs:
     uses: ./.github/workflows/build-binary.yml
 
   build-ui:
-    uses: ./github/workflows/build-ui.yml
+    uses: ./.github/workflows/build-ui.yml
 
   lldap-init-test:
     needs: [build-binary,build-ui]
