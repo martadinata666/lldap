@@ -7,7 +7,10 @@ on:
 
 jobs:
   build-binary:
-    uses: ./.github/workflows/docker-build-static-personal.yml
+    uses: ./.github/workflows/build-binary.yml
+
+  build-ui:
+    uses: ./github/.workflows/build-ui.yml
 
   lldap-init-test:
     needs: [build-binary]
