@@ -15,3 +15,11 @@ jobs:
   lldap-init-test:
     needs: [build-ui,build-binary]
     uses: ./.github/workflows/database-init-test.yml
+
+  lldap-mariadb-migration-test:
+    needs: [build-binary]
+    uses: ./.github/workflows/database-mariadb-migration-test.yml
+
+  lldap-postgress-migration-test:
+    needs: [build-binary]
+    uses: ./.github/workflows/database-postgres-migration-test.yml
