@@ -16,7 +16,7 @@ jobs:
              MARIADB_PASSWORD: lldappass
              MARIADB_DATABASE: lldap
              MARIADB_ROOT_PASSWORD: lldaprootpass
-           options: ->
+           options: >-
              --name mariadb
              --health-cmd="mariadb-admin ping" --health-interval=5s --health-timeout=2s --health-retries=3
 
