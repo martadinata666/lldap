@@ -43,16 +43,16 @@ jobs:
       matrix:
         #target: [armv7-unknown-linux-gnueabihf,aarch64-unknown-linux-musl,x86_64-unknown-linux-musl,x86_64_unknown_freebsd]
         target: [x86_64-unknown-freebsd]
-    container:
-      image: lldap/rust-dev
-      env:
-        CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER: arm-linux-gnueabihf-gcc
-        CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: aarch64-linux-musl-gcc
-        CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER: x86_64-linux-musl-gcc
-        CARGO_TARGET_X86_64_UNKNOWN_FREEBSD_LINKER: clang
-        CC_x86_64_unknown_freebsd: clang
-        CARGO_TERM_COLOR: always
-        CARGO_HOME: ${GITHUB_WORKSPACE}/.cargo
+    #container:
+    #  image: lldap/rust-dev
+    #  env:
+    #    CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER: arm-linux-gnueabihf-gcc
+    #    CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: aarch64-linux-musl-gcc
+    #    CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER: x86_64-linux-musl-gcc
+    #    CARGO_TARGET_X86_64_UNKNOWN_FREEBSD_LINKER: clang
+    #    CC_x86_64_unknown_freebsd: clang
+    #    CARGO_TERM_COLOR: always
+    #    CARGO_HOME: ${GITHUB_WORKSPACE}/.cargo
     steps:
       - uses: actions/checkout@v3
       - uses: actions/cache@v3
@@ -65,11 +65,10 @@ jobs:
           key: lldap-bin-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             lldap-bin-${{ matrix.target }}-
-      - name: Install docker
+      - name: Install podman
         run: |
              apt update
-             apt install -y docker.io
-             dockerd
+             apt install -y podman
       - name: Use cross?
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build with cross
