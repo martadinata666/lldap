@@ -65,30 +65,10 @@ jobs:
           key: lldap-bin-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             lldap-bin-${{ matrix.target }}-
-      - name: Install Clang
-        run: |
-             apt update
-             apt install -y clang tar xz-utils gcc-multilib g++-multilib
-      - name: Fetch FreeBSD
-        run:  |
-              cd /tmp
-              wget http://ftp.plusline.de/FreeBSD/releases/amd64/13.2-RELEASE/base.txz
-              mkdir -p /opt/cross-freebsd-13
-              cd /opt/cross-freebsd-13
-              tar -xf /tmp/base.txz ./lib/ ./usr/lib/ ./usr/include/
-              cd /opt/cross-freebsd-13/usr/lib
-              find . -xtype l|xargs ls -l|grep ' /lib/' | awk '{print "ln -sf /opt/cross-freebsd-13"$11 " " $9}' | /bin/sh
-              ln -s libc++.a /opt/cross-freebsd-13/usr/lib/libstdc++.a
-              ln -s libc++.so /opt/cross-freebsd-13/usr/lib/libstdc++.so 
-              rm -f /tmp/base.txz
-      - name: Append cross freebsd path
-        run:  echo "/opt/cross-freebsd-13/usr/lib:/opt/cross-freebsd-13/usr/inlcude:/opt/cross-freebsd-13/lib" >> $GITHUB_PATH
-      - name: Add target
-        run: rustup target add ${{ matrix.target }}
       - name: Use cross?
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build with cross
-        run: ${GITHUB_WORKSPACE}/.cargo/bin/cross build --target x86_64-unknown-freebsd
+        run: .cargo/bin/cross build --target x86_64-unknown-freebsd
       #- name: compile ${{ matrix.target }}
       #  run: cargo build --target=${{ matrix.target }} --release -p lldap
       - name: check path
