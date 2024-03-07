@@ -62,7 +62,7 @@
       nearskOpt = {
         pname = "lldap";
         inherit src;
-        cargoBuildOptions = x: x++ ["-p" "lldap_set_passwrod" "-p" "lldap_migration_tool"]
+        cargoBuildOptions = x: x++ ["-p" "lldap_set_password" "-p" "lldap_migration_tool"];
       };
       buildServer = target: (cross-naersk'.buildPackage target) nearskOpt;
       hostNaersk = cross-naersk'.hostNaersk;
