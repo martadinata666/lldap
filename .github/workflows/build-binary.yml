@@ -53,6 +53,7 @@ jobs:
         CC_x86_64_unknown_freebsd: clang
         CARGO_TERM_COLOR: always
         CARGO_HOME: ${GITHUB_WORKSPACE}/.cargo
+        RUSTFLAGS: -fuse-ld=lld -stdlib=libc++ -o zpipe zpipe.cc -lz --verbose
     steps:
       - uses: actions/checkout@v3
       - uses: actions/cache@v3
