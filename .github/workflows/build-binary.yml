@@ -87,7 +87,8 @@ jobs:
 
       - name: compile ${{ matrix.target }}
         run: |
-             export PATH="/opt/cross-freebsd-13/:$PATH"
+             echo "/opt/cross-freebsd-13/usr/lib" >> $GITHUB_PATH
+             echo "/opt/cross-freebsd-13/usr/inlcude" >> $GITHUB_PATH
              cargo build --target=${{ matrix.target }} --release -p lldap -p lldap_migration_tool -p lldap_set_password
 
       - name: check path
