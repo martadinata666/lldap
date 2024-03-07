@@ -65,6 +65,11 @@ jobs:
           key: lldap-bin-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             lldap-bin-${{ matrix.target }}-
+      - name: Install podman
+        run: |
+             apt update
+             apt install -y  podman
+        
       - name: Use cross?
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build with cross
