@@ -86,16 +86,6 @@
       packages =
         # cross compile lldap for all targets
         (genAttrs targets buildServer) //
-        # check,test,clippy for lldap
-        (genAttrs checks (mode: hostNaersk.buildPackage (nearskOpt // { inherit mode;}))) //
-        // rec {
-          lldap = hostNaersk.buildPackage nearskOpt;
-          checkMsrv = naerskMsrv.buildPackage (nearskOpt
-            // {
-              mode = "check";
-            });
-          default = lldap;
-        };
 
 
       devShells = {
