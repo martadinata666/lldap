@@ -64,8 +64,10 @@ jobs:
           key: lldap-bin-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             lldap-bin-${{ matrix.target }}-
-      - name: show my env
-        run: env
+      - name: Install latest
+        run: |
+             rustup install stable
+             rustup default stable
 
       - name: Add target
         run: rustup target add ${{ matrix.target }}
