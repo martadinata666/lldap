@@ -69,7 +69,7 @@ jobs:
       - name: Install Clang
         run: |
              apt update
-             apt install -y clang
+             apt install -y clang tar xz
       - name: Fetch FreeBSD
         run:  |
               cd /tmp
