@@ -41,14 +41,15 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        target: [armv7-unknown-linux-gnueabihf,aarch64-unknown-linux-musl,x86_64-unknown-linux-musl]
+        target: [armv7-unknown-linux-gnueabihf,aarch64-unknown-linux-musl,x86_64-unknown-linux-musl,x86_64_unknown_freebsd]
     container:
-      image: martadinata666/rust:latest
-      options: --user root
+      image: lldap/rust-dev
       env:
         CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER: arm-linux-gnueabihf-gcc
         CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: aarch64-linux-musl-gcc
         CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER: x86_64-linux-musl-gcc
+        CARGO_TARGET_X86_64_UNKNOWN_FREEBSD_LINKER: clang
+        CC_x86_64_unknown_freebsd: clang
         CARGO_TERM_COLOR: always
         RUSTFLAGS: -Ctarget-feature=+crt-static
         CARGO_HOME: ${GITHUB_WORKSPACE}/.cargo
@@ -64,11 +65,21 @@ jobs:
           key: lldap-bin-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             lldap-bin-${{ matrix.target }}-
-      - name: Install latest
+      - name: Install Clang
         run: |
-             rustup install stable
-             rustup default stable
-
+             apt update
+             apt install -y clang
+      - name: Fetch FreeBSD
+        run:  |
+              cd /tmp && wget http://ftp.plusline.de/FreeBSD/releases/amd64/13.2-RELEASE/base.txz
+              mkdir -p /opt/cross-freebsd-13
+              cd /opt/cross-freebsd-13 \
+              tar -xf /tmp/base.txz ./lib/ ./usr/lib/ ./usr/include/
+              cd /opt/cross-freebsd-13/usr/lib
+              find . -xtype l|xargs ls -l|grep ' /lib/' | awk '{print "ln -sf /opt/cross-freebsd-13"$11 " " $9}' | /bin/sh
+              ln -s libc++.a /opt/cross-freebsd-13/usr/lib/libstdc++.a
+              ln -s libc++.so /opt/cross-freebsd-13/usr/lib/libstdc++.so 
+              rm -f /tmp/base.txz
       - name: Add target
         run: rustup target add ${{ matrix.target }}
 
