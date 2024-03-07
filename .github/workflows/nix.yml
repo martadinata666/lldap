@@ -1,0 +1,29 @@
+name: Nix Test
+
+on:
+  push:
+    branches:
+      - personal
+
+jobs:
+  matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v20
+      - id: set-matrix
+        run: echo "matrix={\"target\":$(nix eval --json ".#targets.x86_64-linux")}" | tee $GITHUB_OUTPUT
+
+  release-binaries:
+    runs-on: ubuntu-latest
+    needs: [matrix]
+    strategy:
+      fail-fast: false
+      matrix: ${{fromJson(needs.matrix.outputs.matrix)}}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v20
+      - run: nix build .#${{ matrix.target }}
+
