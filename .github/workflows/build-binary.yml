@@ -68,7 +68,7 @@ jobs:
       - name: Install podman
         run: |
              apt update
-             apt install -y  podman
+             apt install -y docker
         
       - name: Use cross?
         run: cargo install cross --git https://github.com/cross-rs/cross
