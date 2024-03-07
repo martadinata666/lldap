@@ -41,7 +41,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        target: [armv7-unknown-linux-gnueabihf,aarch64-unknown-linux-musl,x86_64-unknown-linux-musl,x86_64_unknown_freebsd]
+        #target: [armv7-unknown-linux-gnueabihf,aarch64-unknown-linux-musl,x86_64-unknown-linux-musl,x86_64_unknown_freebsd]
+        target: [x86_64_unknown_freebsd]
     container:
       image: lldap/rust-dev
       env:
@@ -71,9 +72,10 @@ jobs:
              apt install -y clang
       - name: Fetch FreeBSD
         run:  |
-              cd /tmp && wget http://ftp.plusline.de/FreeBSD/releases/amd64/13.2-RELEASE/base.txz
+              cd /tmp
+              wget http://ftp.plusline.de/FreeBSD/releases/amd64/13.2-RELEASE/base.txz
               mkdir -p /opt/cross-freebsd-13
-              cd /opt/cross-freebsd-13 \
+              cd /opt/cross-freebsd-13
               tar -xf /tmp/base.txz ./lib/ ./usr/lib/ ./usr/include/
               cd /opt/cross-freebsd-13/usr/lib
               find . -xtype l|xargs ls -l|grep ' /lib/' | awk '{print "ln -sf /opt/cross-freebsd-13"$11 " " $9}' | /bin/sh
