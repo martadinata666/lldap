@@ -87,7 +87,7 @@ jobs:
       - name: Add target
         run: rustup target add ${{ matrix.target }}
       - name: compile ${{ matrix.target }}
-        run: cargo build --target=${{ matrix.target }} --release -p lldap -p lldap_migration_tool
+        run: cargo build --target=${{ matrix.target }} --release -p lldap
       - name: check path
         run: ls -alr target/release
 
