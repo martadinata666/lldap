@@ -72,7 +72,7 @@ jobs:
       - name: Use cross?
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build with cross
-        run: ${CARGO_HOME}/bin/cross build --target x86_64-unknown-freebsd
+        run: /home/runner/.cargo/bin/cross build --target x86_64-unknown-freebsd
       #- name: compile ${{ matrix.target }}
       #  run: cargo build --target=${{ matrix.target }} --release -p lldap
       - name: check path
