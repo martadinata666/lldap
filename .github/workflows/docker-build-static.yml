@@ -78,7 +78,10 @@ jobs:
           paths_ignore: '["**/*.md", "**/docs/**", "example_configs/**", "*.sh", ".gitignore", "lldap_config.docker_template.toml"]'
           do_not_skip: '["workflow_dispatch", "schedule"]'
           cancel_others: true
-
+          
+  build-freebsd-binary:
+    uses: ./.github/workflows/build-freebsd-binary.yml
+    
   build-ui:
     runs-on: ubuntu-latest
     needs: pre_job
