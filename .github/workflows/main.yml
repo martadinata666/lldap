@@ -6,8 +6,11 @@ on:
       - personal
 
 jobs:
-  build-binary:
-    uses: ./.github/workflows/build-binary.yml
+  build-linux-binary:
+    uses: ./.github/workflows/build-linux-binary.yml
+    
+  build-freebsd-binary:
+    uses: ./.github/workflows/build-freebsd-binary.yml  
 
   build-ui:
     uses: ./.github/workflows/build-ui.yml
