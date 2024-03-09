@@ -52,9 +52,9 @@ jobs:
 
        - name: Export and Converting to mariadb
          run: |
-              echo "Export to mariadb"
-              sqlite3 ./users.db .dump | grep "^INSERT" | grep -v "^INSERT INTO metdata" > ./mariadb.sql
-              ls -al
+              bash ./scripts/sqlite_dump_commands.sh | sqlite3 ./users.db > ./dump.sql
+              sed -i -r -e 's/^INSERT INTO "?([a-zA-Z0-9_]+)"?/INSERT INTO `\1`/' -e '1s/^/START TRANSACTION;\n/' -e '$aCOMMIT;' ./dump.sql
+              sed  -i '1 i\SET FOREIGN_KEY_CHECKS = 0;' ./dump.sql
 
        - name: Run lldap with mariadb DB and healthcheck
          run: |
