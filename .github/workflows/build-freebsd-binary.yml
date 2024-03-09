@@ -3,9 +3,6 @@ name: build freebsd binary
 on:
   workflow_call:
 
-env:
-  CARGO_TERM_COLOR: always
-
 jobs:
   build-bin:
     runs-on: ubuntu-latest
@@ -15,9 +12,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/cache@v3
-          key: lldap-bin-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            lldap-bin-${{ matrix.target }}-
+        with:
+            key: lldap-bin-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+            restore-keys: |
+              lldap-bin-${{ matrix.target }}-
       - name: Install podman
         run: |
              sudo apt update
