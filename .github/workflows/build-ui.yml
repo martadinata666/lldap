@@ -7,8 +7,7 @@ jobs:
   build-ui:
     runs-on: ubuntu-latest
     container:
-      image: martadinata666/rust:latest
-      options: --user root
+      image: lldap/rust-dev:latest
     steps:
       - name: Pull from git
         run: |
