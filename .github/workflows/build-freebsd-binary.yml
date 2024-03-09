@@ -13,8 +13,14 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/cache@v3
         with:
-            key: lldap-bin-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
-            restore-keys: |
+          path: |
+                ~/.cargo/bin/
+                ~/.cargo/registry/index/
+                ~/.cargo/registry/cache/
+                ~/.cargo/git/db/
+                target/
+          key: lldap-bin-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
               lldap-bin-${{ matrix.target }}-
       - name: Install podman
         run: |
