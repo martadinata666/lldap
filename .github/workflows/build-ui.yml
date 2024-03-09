@@ -9,10 +9,6 @@ jobs:
     container:
       image: lldap/rust-dev:latest
     steps:
-      - name: Pull from git
-        run: |
-              sudo apt update
-              sudo apt -y install gzip
       - uses: actions/checkout@v3
       - uses: actions/cache@v3
         with:
