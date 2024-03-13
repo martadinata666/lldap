@@ -754,6 +754,6 @@ jobs:
           artifacts:  aarch64-lldap.tar.gz,
                       amd64-lldap.tar.gz,
                       armhf-lldap.tar.gz,
-                      x86_64-freebsd-lldap.tar.gz
+                      amd64-freebsd-lldap.tar.gz
         env:
          GITHUB_TOKEN: ${{ github.token }}
