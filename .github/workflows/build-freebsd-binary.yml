@@ -10,7 +10,7 @@ jobs:
       matrix:
         target: [x86_64-unknown-freebsd]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/cache@v3
         with:
           path: |
@@ -36,19 +36,19 @@ jobs:
         run: ls -alr target/release
 
       - name: upload ${{ matrix.target}} lldap artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target}}-lldap-bin
           path: target/${{ matrix.target }}/release/lldap
 
       - name: upload ${{ matrix.target }} migration tool artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target }}-migration-tool-bin
           path: target/${{ matrix.target }}/release/lldap_migration_tool
 
       - name: upload ${{ matrix.target }}-set-password-bin
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target }}-lldap-set-password-bin
           path: target/${{ matrix.target }}/release/lldap_set_password
