@@ -662,7 +662,7 @@ jobs:
 ### Download artifacts, clean up ui, upload to release page ###
 ###############################################################
   create-release-artifacts:
-     needs: [build-ui, build-bin]
+     needs: [build-ui, build-bin,build-freebsd-binary]
      name: Create release artifacts
      if: github.event_name == 'release'
      runs-on: ubuntu-latest
@@ -686,6 +686,9 @@ jobs:
              mv bin/aarch64-unknown-linux-musl-lldap_set_password-bin/lldap_set_password bin/aarch64-lldap_set_password
              mv bin/x86_64-unknown-linux-musl-lldap_set_password-bin/lldap_set_password bin/amd64-lldap_set_password
              mv bin/armv7-unknown-linux-musleabihf-lldap_set_password-bin/lldap_set_password bin/armhf-lldap_set_password
+             mv bin/x86_64-unknown-freebsd-lldap-bin/lldap bin/x86_64-freebsd-lldap
+             mv bin/x86_64-unknown-freebsd-lldap_migration_tool-bin/lldap_migration_tool bin/x86_64-freebsd-lldap_migration_tool
+             mv bin/x86_64-unknown-freebsd-lldap_set_password-bin/lldap_set_password bin/x86_64-freebsd-lldap_set_password
              chmod +x bin/*-lldap
              chmod +x bin/*-lldap_migration_tool
              chmod +x bin/*-lldap_set_password
