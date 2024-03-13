@@ -716,7 +716,7 @@ jobs:
              mkdir aarch64-lldap
              mkdir amd64-lldap
              mkdir armhf-lldap
-             mkdir x86_64-freebsd-lldap
+             mkdir amd64-freebsd-lldap
              mv bin/aarch64-lldap aarch64-lldap/lldap
              mv bin/amd64-lldap amd64-lldap/lldap
              mv bin/armhf-lldap armhf-lldap/lldap
@@ -726,24 +726,24 @@ jobs:
              mv bin/aarch64-lldap_set_password aarch64-lldap/lldap_set_password
              mv bin/amd64-lldap_set_password amd64-lldap/lldap_set_password
              mv bin/armhf-lldap_set_password armhf-lldap/lldap_set_password
-             mv bin/x86_64-freebsd-lldap x86_64-freebsd-lldap/lldap
-             mv bin/x86_64-freebsd-lldap_migration_tool x86_64-freebsd-lldap/lldap_migration_tool
-             mv bin/x86_64-freebsd-lldap_set_password x86_64-freebsd-lldap/lldap_set_password
+             mv bin/x86_64-freebsd-lldap amd64-freebsd-lldap/lldap
+             mv bin/x86_64-freebsd-lldap_migration_tool amd64-freebsd-lldap/lldap_migration_tool
+             mv bin/x86_64-freebsd-lldap_set_password amd64-freebsd-lldap/lldap_set_password
              cp -r app aarch64-lldap/
              cp -r app amd64-lldap/
              cp -r app armhf-lldap/
-             cp -r app x86_64-freebsd-lldap/
+             cp -r app amd64-freebsd-lldap/
              ls -al aarch64-lldap/
              ls -al amd64-lldap/
              ls -al armhf-lldap/
-             ls -al x86_64-freebsd-lldap/
+             ls -al amd64-freebsd-lldap/
 
       - name: Packing LLDAP and Web UI
         run: |
              tar -czvf aarch64-lldap.tar.gz aarch64-lldap/
              tar -czvf amd64-lldap.tar.gz amd64-lldap/
              tar -czvf armhf-lldap.tar.gz armhf-lldap/
-             tar -czvf x86_64-freebsd-lldap/
+             tar -czvf amd64-freebsd-lldap/
 
 
       - name: Upload compressed release
