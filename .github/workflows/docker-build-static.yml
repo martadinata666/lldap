@@ -743,7 +743,7 @@ jobs:
              tar -czvf aarch64-lldap.tar.gz aarch64-lldap/
              tar -czvf amd64-lldap.tar.gz amd64-lldap/
              tar -czvf armhf-lldap.tar.gz armhf-lldap/
-             tar -czvf amd64-freebsd-lldap/
+             tar -czvf amd64-freebsd-lldap.tar.gz amd64-freebsd-lldap/
 
 
       - name: Upload compressed release
