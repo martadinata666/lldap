@@ -50,8 +50,8 @@ jobs:
         RUSTFLAGS: -Ctarget-feature=+crt-static
         CARGO_HOME: ${GITHUB_WORKSPACE}/.cargo
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
+      - uses: actions/checkout@latest
+      - uses: actions/cache@latest
         with:
           path: |
             .cargo/registry/index
@@ -74,7 +74,7 @@ jobs:
         run: ls -alr target/release
 
       - name: upload ${{ matrix.target}} lldap artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@latest
         with:
           name: ${{ matrix.target}}-lldap-bin
           path: target/${{ matrix.target }}/release/lldap
@@ -86,7 +86,7 @@ jobs:
           path: target/${{ matrix.target }}/release/lldap_migration_tool
 
       - name: upload ${{ matrix.target }}-set-password-bin
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@latest
         with:
           name: ${{ matrix.target }}-lldap-set-password-bin
           path: target/${{ matrix.target }}/release/lldap_set_password
