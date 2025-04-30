@@ -80,7 +80,7 @@ jobs:
           path: target/${{ matrix.target }}/release/lldap
 
       - name: upload ${{ matrix.target }} migration tool artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@latest
         with:
           name: ${{ matrix.target }}-migration-tool-bin
           path: target/${{ matrix.target }}/release/lldap_migration_tool
