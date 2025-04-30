@@ -36,8 +36,10 @@
 - [About](#about)
 - [Installation](#installation)
   - [With Docker](#with-docker)
+  - [With Podman](#with-podman)
   - [With Kubernetes](#with-kubernetes)
   - [From a package repository](#from-a-package-repository)
+  - [With FreeBSD](#with-freebsd)
   - [From source](#from-source)
     - [Backend](#backend)
     - [Frontend](#frontend)
@@ -47,6 +49,7 @@
 - [Client configuration](#client-configuration)
   - [Compatible services](#compatible-services)
   - [General configuration guide](#general-configuration-guide)
+  - [Integration with OS's](#integration-with-oss)
   - [Sample client configurations](#sample-client-configurations)
   - [Incompatible services](#incompatible-services)
 - [Migrating from SQLite](#migrating-from-sqlite)
@@ -55,6 +58,7 @@
   - [vs FreeIPA](#vs-freeipa)
   - [vs Kanidm](#vs-kanidm)
 - [I can't log in!](#i-cant-log-in)
+- [Discord Integration](#discord-integration)
 - [Contributions](#contributions)
 
 ## About
@@ -154,6 +158,7 @@ services:
       - LLDAP_JWT_SECRET=REPLACE_WITH_RANDOM
       - LLDAP_KEY_SEED=REPLACE_WITH_RANDOM
       - LLDAP_LDAP_BASE_DN=dc=example,dc=com
+      - LLDAP_LDAP_USER_PASS=adminPas$word
       # If using LDAPS, set enabled true and configure cert and key path
       # - LLDAP_LDAPS_OPTIONS__ENABLED=true
       # - LLDAP_LDAPS_OPTIONS__CERT_FILE=/path/to/certfile.crt
@@ -161,10 +166,26 @@ services:
       # You can also set a different database:
       # - LLDAP_DATABASE_URL=mysql://mysql-user:password@mysql-server/my-database
       # - LLDAP_DATABASE_URL=postgres://postgres-user:password@postgres-server/my-database
+      # If using SMTP, set the following variables
+      # - LLDAP_SMTP_OPTIONS__ENABLE_PASSWORD_RESET=true
+      # - LLDAP_SMTP_OPTIONS__SERVER=smtp.example.com
+      # - LLDAP_SMTP_OPTIONS__PORT=465 # Check your smtp providor's documentation for this setting
+      # - LLDAP_SMTP_OPTIONS__SMTP_ENCRYPTION=TLS # How the connection is encrypted, either "NONE" (no encryption, port 25), "TLS" (sometimes called SSL, port 465) or "STARTTLS" (sometimes called TLS, port 587).
+      # - LLDAP_SMTP_OPTIONS__USER=no-reply@example.com # The SMTP user, usually your email address
+      # - LLDAP_SMTP_OPTIONS__PASSWORD=PasswordGoesHere # The SMTP password
+      # - LLDAP_SMTP_OPTIONS__FROM=no-reply <no-reply@example.com> # The header field, optional: how the sender appears in the email. The first is a free-form name, followed by an email between <>.
+      # - LLDAP_SMTP_OPTIONS__TO=admin <admin@example.com> # Same for reply-to, optional.
 ```
 
 Then the service will listen on two ports, one for LDAP and one for the web
 front-end.
+
+### With Podman
+
+LLDAP works well with rootless Podman either through command line deployment
+or using [quadlets](example_configs/podman-quadlets/). The example quadlets
+include configuration with postgresql and file based secrets, but have comments
+for several other deployment strategies.
 
 ### With Kubernetes
 
@@ -183,30 +204,229 @@ Depending on the distribution you use, it might be possible to install lldap
 from a package repository, officially supported by the distribution or
 community contributed.
 
-#### Debian, CentOS Fedora, OpenSUSE, Ubuntu
+Each package offers a [systemd service](https://wiki.archlinux.org/title/systemd#Using_units) `lldap.service` to (auto-)start and stop lldap.<br>
+When using the distributed packages, the default login is `admin/password`. You can change that from the web UI after starting the service.
 
-The package for these distributions can be found at [LLDAP OBS](https://software.opensuse.org//download.html?project=home%3AMasgalor%3ALLDAP&package=lldap).
-- When using the distributed package, the default login is `admin/password`. You can change that from the web UI after starting the service.
+<details>
+<summary><b>Arch Linux</b></summary>
+<br>
+  Arch Linux offers unofficial support through the <a href="https://wiki.archlinux.org/title/Arch_User_Repository">Arch User Repository (AUR)</a>.<br>
+  The package descriptions can be used <a href="https://wiki.archlinux.org/title/Arch_User_Repository#Getting_started">to create and install packages</a>.<br><br>
+  Support: <a href="https://github.com/lldap/lldap/discussions/1044">Discussions</a><br>
+  Package repository: <a href="https://aur.archlinux.org/packages">Arch User Repository</a><br><br>
+<table>
+  <tr>
+    <td>Package name</td>
+    <td>Maintainer</td>
+    <td>Description</td>
+  </tr>
+  <tr>
+    <td><a href="https://aur.archlinux.org/packages/lldap">lldap</a></td>
+    <td><a href="https://github.com/Zepmann">@Zepmann</a></td>
+    <td>Builds the latest stable version.</td>
+  </tr>
+  <tr>
+    <td><a href="https://aur.archlinux.org/packages/lldap-bin">lldap-bin</a></td>
+    <td><a href="https://github.com/Zepmann">@Zepmann</a></td>
+    <td>Uses the latest pre-compiled binaries from the <a href="https://github.com/lldap/lldap/releases">releases in this repository</a>.<br>
+        This package is recommended if you want to run LLDAP on a system with limited resources.</td>
+  </tr>
+  <tr>
+    <td><a href="https://aur.archlinux.org/packages/lldap-git">lldap-git</a></td>
+    <td></td>
+    <td>Builds the latest main branch code.</td>
+  </tr>
+</table>
+LLDAP configuration file: /etc/lldap.toml<br>
+</details>
+<details>
+<summary><b>Debian</b></summary>
+<br>
+  Unofficial Debian support is offered through the <a href="https://build.opensuse.org/">openSUSE Build Service</a>.<br><br>
+  Maintainer: <a href="https://github.com/Masgalor">@Masgalor</a><br>
+  Support: <a href="https://codeberg.org/Masgalor/LLDAP-Packaging/issues">Codeberg</a>, <a href="https://github.com/lldap/lldap/discussions">Discussions</a><br>
+  Package repository: <a href="https://software.opensuse.org//download.html?project=home%3AMasgalor%3ALLDAP&package=lldap">SUSE openBuildService</a><br>
+<table>
+  <tr>
+    <td>Available packages:</td>
+    <td>lldap</td>
+    <td>Light LDAP server for authentication.</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>lldap-extras</td>
+    <td>Meta-Package for LLDAP and its tools and extensions.</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>lldap-migration-tool</td>
+    <td>CLI migration tool to go from OpenLDAP to LLDAP.</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>lldap-set-password</td>
+    <td>CLI tool to set a user password in LLDAP.</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>lldap-cli</td>
+    <td>LLDAP-CLI is an unofficial command line interface for LLDAP.</td>
+  </tr>
+</table>
+LLDPA configuration file: /etc/lldap/lldap_config.toml<br>
+</details>
+<details>
+<summary><b>CentOS</b></summary>
+<br>
+  Unofficial CentOS support is offered through the <a href="https://build.opensuse.org/">openSUSE Build Service</a>.<br><br>
+  Maintainer: <a href="https://github.com/Masgalor">@Masgalor</a><br>
+  Support: <a href="https://codeberg.org/Masgalor/LLDAP-Packaging/issues">Codeberg</a>, <a href="https://github.com/lldap/lldap/discussions">Discussions</a><br>
+  Package repository: <a href="https://software.opensuse.org//download.html?project=home%3AMasgalor%3ALLDAP&package=lldap">SUSE openBuildService</a><br>
+<table>
+  <tr>
+    <td>Available packages:</td>
+    <td>lldap</td>
+    <td>Light LDAP server for authentication.</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>lldap-extras</td>
+    <td>Meta-Package for LLDAP and its tools and extensions.</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>lldap-migration-tool</td>
+    <td>CLI migration tool to go from OpenLDAP to LLDAP.</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>lldap-set-password</td>
+    <td>CLI tool to set a user password in LLDAP.</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>lldap-cli</td>
+    <td>LLDAP-CLI is an unofficial command line interface for LLDAP.</td>
+  </tr>
+</table>
+LLDPA configuration file: /etc/lldap/lldap_config.toml<br>
+</details>
+<details>
+<summary><b>Fedora</b></summary>
+<br>
+  Unofficial Fedora support is offered through the <a href="https://build.opensuse.org/">openSUSE Build Service</a>.<br><br>
+  Maintainer: <a href="https://github.com/Masgalor">@Masgalor</a><br>
+  Support: <a href="https://codeberg.org/Masgalor/LLDAP-Packaging/issues">Codeberg</a>, <a href="https://github.com/lldap/lldap/discussions">Discussions</a><br>
+  Package repository: <a href="https://software.opensuse.org//download.html?project=home%3AMasgalor%3ALLDAP&package=lldap">SUSE openBuildService</a><br>
+<table>
+  <tr>
+    <td>Available packages:</td>
+    <td>lldap</td>
+    <td>Light LDAP server for authentication.</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>lldap-extras</td>
+    <td>Meta-Package for LLDAP and its tools and extensions.</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>lldap-migration-tool</td>
+    <td>CLI migration tool to go from OpenLDAP to LLDAP.</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>lldap-set-password</td>
+    <td>CLI tool to set a user password in LLDAP.</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>lldap-cli</td>
+    <td>LLDAP-CLI is an unofficial command line interface for LLDAP.</td>
+  </tr>
+</table>
+LLDPA configuration file: /etc/lldap/lldap_config.toml<br>
+</details>
+<details>
+<summary><b>OpenSUSE</b></summary>
+<br>
+  Unofficial OpenSUSE support is offered through the <a href="https://build.opensuse.org/">openSUSE Build Service</a>.<br><br>
+  Maintainer: <a href="https://github.com/Masgalor">@Masgalor</a><br>
+  Support: <a href="https://codeberg.org/Masgalor/LLDAP-Packaging/issues">Codeberg</a>, <a href="https://github.com/lldap/lldap/discussions">Discussions</a><br>
+  Package repository: <a href="https://software.opensuse.org//download.html?project=home%3AMasgalor%3ALLDAP&package=lldap">SUSE openBuildService</a><br>
+<table>
+  <tr>
+    <td>Available packages:</td>
+    <td>lldap</td>
+    <td>Light LDAP server for authentication.</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>lldap-extras</td>
+    <td>Meta-Package for LLDAP and its tools and extensions.</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>lldap-migration-tool</td>
+    <td>CLI migration tool to go from OpenLDAP to LLDAP.</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>lldap-set-password</td>
+    <td>CLI tool to set a user password in LLDAP.</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>lldap-cli</td>
+    <td>LLDAP-CLI is an unofficial command line interface for LLDAP.</td>
+  </tr>
+</table>
+LLDPA configuration file: /etc/lldap/lldap_config.toml<br>
+</details>
+<details>
+<summary><b>Ubuntu</b></summary>
+<br>
+  Unofficial Ubuntu support is offered through the <a href="https://build.opensuse.org/">openSUSE Build Service</a>.<br><br>
+  Maintainer: <a href="https://github.com/Masgalor">@Masgalor</a><br>
+  Support: <a href="https://codeberg.org/Masgalor/LLDAP-Packaging/issues">Codeberg</a>, <a href="https://github.com/lldap/lldap/discussions">Discussions</a><br>
+  Package repository: <a href="https://software.opensuse.org//download.html?project=home%3AMasgalor%3ALLDAP&package=lldap">SUSE openBuildService</a><br>
+<table>
+  <tr>
+    <td>Available packages:</td>
+    <td>lldap</td>
+    <td>Light LDAP server for authentication.</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>lldap-extras</td>
+    <td>Meta-Package for LLDAP and its tools and extensions.</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>lldap-migration-tool</td>
+    <td>CLI migration tool to go from OpenLDAP to LLDAP.</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>lldap-set-password</td>
+    <td>CLI tool to set a user password in LLDAP.</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>lldap-cli</td>
+    <td>LLDAP-CLI is an unofficial command line interface for LLDAP.</td>
+  </tr>
+</table>
+LLDPA configuration file: /etc/lldap/lldap_config.toml<br>
+</details>
 
-#### Arch Linux
+### With FreeBSD
 
-Arch Linux offers unofficial support through the [Arch User Repository
-(AUR)](https://wiki.archlinux.org/title/Arch_User_Repository).
-Available package descriptions in AUR are:
+You can also install it as a rc.d service in FreeBSD, see
+[FreeBSD-install.md](example_configs/freebsd/freebsd-install.md).
 
-- [lldap](https://aur.archlinux.org/packages/lldap) -  Builds the latest stable version.
-- [lldap-bin](https://aur.archlinux.org/packages/lldap-bin) - Uses the latest
-  pre-compiled binaries from the [releases in this repository](https://github.com/lldap/lldap/releases).
-  This package is recommended if you want to run lldap on a system with
-  limited resources.
-- [lldap-git](https://aur.archlinux.org/packages/lldap-git) - Builds the
-  latest main branch code.
-
-The package descriptions can be used
-[to create and install packages](https://wiki.archlinux.org/title/Arch_User_Repository#Getting_started).
-Each package places lldap's configuration file at `/etc/lldap.toml` and offers
-[systemd service](https://wiki.archlinux.org/title/systemd#Using_units)
-`lldap.service` to (auto-)start and stop lldap.
+The rc.d script file
+[rc.d_lldap](example_configs/freebsd/rc.d_lldap).
 
 ### From source
 
@@ -277,10 +497,16 @@ create users, set passwords, add them to groups and so on. Users can also
 connect to the web UI and change their information, or request a password reset
 link (if you configured the SMTP client).
 
-Creating and managing custom attributes is currently in Beta. It's not
-supported in the Web UI. The recommended way is to use
-[Zepmann/lldap-cli](https://github.com/Zepmann/lldap-cli), a
-community-contributed CLI frontend.
+You can create and manage custom attributes through the Web UI, or through the
+community-contributed CLI frontend (
+[Zepmann/lldap-cli](https://github.com/Zepmann/lldap-cli)). This is necessary
+for some service integrations.
+
+The [bootstrap.sh](scripts/bootstrap.sh) script can enforce a list of
+users/groups/attributes from a given file, reflecting it on the server.
+
+To manage the user, group and membership lifecycle in an infrastructure-as-code
+scenario you can use the unofficial [LLDAP terraform provider in the terraform registry](https://registry.terraform.io/providers/tasansga/lldap/latest).
 
 LLDAP is also very scriptable, through its GraphQL API. See the
 [Scripting](docs/scripting.md) docs for more info.
@@ -340,7 +566,16 @@ filter like: `(memberOf=cn=admins,ou=groups,dc=example,dc=com)`.
 The administrator group for LLDAP is `lldap_admin`: anyone in this group has
 admin rights in the Web UI. Most LDAP integrations should instead use a user in
 the `lldap_strict_readonly` or `lldap_password_manager` group, to avoid granting full
-administration access to many services.
+administration access to many services. To prevent privilege escalation users in the
+`lldap_password_manager` group are not allowed to change passwords of admins in the
+`lldap_admin` group.
+
+### Integration with OS's
+
+Integration with Linux accounts is possible, through PAM and nslcd. See [PAM
+configuration guide](example_configs/pam/README.md).
+
+Integration with Windows (e.g. Samba) is WIP.
 
 ### Sample client configurations
 
@@ -355,10 +590,12 @@ folder for help with:
 - [Authentik](example_configs/authentik.md)
 - [Bookstack](example_configs/bookstack.env.example)
 - [Calibre-Web](example_configs/calibre_web.md)
+- [Carpal](example_configs/carpal.md)
 - [Dell iDRAC](example_configs/dell_idrac.md)
 - [Dex](example_configs/dex_config.yml)
 - [Dokuwiki](example_configs/dokuwiki.md)
 - [Dolibarr](example_configs/dolibarr.md)
+- [Duo Auth Proxy](example_configs/duo_auth_proxy.md)
 - [Ejabberd](example_configs/ejabberd.md)
 - [Emby](example_configs/emby.md)
 - [Ergo IRCd](example_configs/ergo.md)
@@ -366,6 +603,8 @@ folder for help with:
 - [GitLab](example_configs/gitlab.md)
 - [Grafana](example_configs/grafana_ldap_config.toml)
 - [Grocy](example_configs/grocy.md)
+- [Harbor](example_configs/harbor.md)
+- [HashiCorp Vault](example_configs/hashicorp-vault.md)
 - [Hedgedoc](example_configs/hedgedoc.md)
 - [Home Assistant](example_configs/home-assistant.md)
 - [Jellyfin](example_configs/jellyfin.md)
@@ -373,24 +612,35 @@ folder for help with:
 - [Jitsi Meet](example_configs/jitsi_meet.conf)
 - [Kasm](example_configs/kasm.md)
 - [KeyCloak](example_configs/keycloak.md)
+- [Kimai](example_configs/kimai.yaml)
 - [LibreNMS](example_configs/librenms.md)
 - [Maddy](example_configs/maddy.md)
 - [Mastodon](example_configs/mastodon.env.example)
 - [Matrix](example_configs/matrix_synapse.yml)
 - [Mealie](example_configs/mealie.md)
+- [Metabase](example_configs/metabase.md)
+- [MegaRAC-BMC](example_configs/MegaRAC-SP-X-BMC.md)
 - [MinIO](example_configs/minio.md)
+- [Netbox](example_configs/netbox.md)
 - [Nextcloud](example_configs/nextcloud.md)
 - [Nexus](example_configs/nexus.md)
 - [OCIS (OwnCloud Infinite Scale)](example_configs/ocis.md)
+- [OneDev](example_configs/onedev.md)
 - [Organizr](example_configs/Organizr.md)
+- [Penpot](example_configs/penpot.md)
+- [pgAdmin](example_configs/pgadmin.md)
 - [Portainer](example_configs/portainer.md)
 - [PowerDNS Admin](example_configs/powerdns_admin.md)
+- [Prosody](example_configs/prosody.md)
 - [Proxmox VE](example_configs/proxmox.md)
+- [Quay](example_configs/quay.md)
 - [Radicale](example_configs/radicale.md)
 - [Rancher](example_configs/rancher.md)
 - [Seafile](example_configs/seafile.md)
 - [Shaarli](example_configs/shaarli.md)
+- [SonarQube](example_configs/sonarqube.md)
 - [Squid](example_configs/squid.md)
+- [Stalwart](example_configs/stalwart.md)
 - [Syncthing](example_configs/syncthing.md)
 - [TheLounge](example_configs/thelounge.md)
 - [Traccar](example_configs/traccar.xml)
@@ -480,6 +730,9 @@ modern identity protocols, check out Kanidm.
 If you just set up the server, can get to the login page but the password you
 set isn't working, try the following:
 
+- If you have changed the admin password in the config after the first run, it
+  won't be used (unless you force its use with `force_ldap_user_pass_reset`).
+  The config password is only for the initial admin creation.
 - (For docker): Make sure that the `/data` folder is persistent, either to a
   docker volume or mounted from the host filesystem.
 - Check if there is a `lldap_config.toml` file (either in `/data` for docker
@@ -494,6 +747,10 @@ set isn't working, try the following:
 - Make sure you restart the server.
 - If it's still not working, join the
   [Discord server](https://discord.gg/h5PEdRMNyP) to ask for help.
+
+## Discord Integration
+[Use this bot](https://github.com/JaidenW/LLDAP-Discord) to Automate discord role syncronization for paid memberships.
+- Allows users with the Subscriber role to self-serve create an LLDAP account based on their Discord username, using the `/register` command.
 
 ## Contributions
 

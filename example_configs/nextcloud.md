@@ -74,6 +74,7 @@ occ ldap:set-config s01 ldapUserDisplayName displayname
 occ ldap:set-config s01 ldapUserFilterMode 1
 occ ldap:set-config s01 ldapUuidGroupAttribute auto
 occ ldap:set-config s01 ldapUuidUserAttribute auto
+occ ldap:set-config s01 ldapExpertUsernameAttr user_id
 ```
 With a bit of of luck, you should be able to log in your nextcloud instance with LLDAP accounts in the `nextcloud_users` group.
 
@@ -114,8 +115,15 @@ Enter a valid username in lldap and check if your filter is working.
 ### Groups
 
 You can use the menus for this part : select `groupOfUniqueNames` in the first menu and check every group you want members to be allowed to view their group member / share files with.
-
+For example:
+```
+(&(|(objectclass=groupOfUniqueNames))(|(cn=family)(cn=friends)))
+```
 ![groups configuration page](images/nextcloud_groups.png)
+
+### Expert
+
+Set `Internal Username` to `user_id`. This is needed to that the user ID used by Nextcloud corresponds to the `user_id` field and not the `UUID` field.
 
 ## Sharing restrictions
 

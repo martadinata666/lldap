@@ -1,6 +1,6 @@
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use ldap3::{ResultEntry, SearchEntry};
-use requestty::{prompt_one, Question};
+use requestty::{Question, prompt_one};
 use smallvec::SmallVec;
 
 use crate::lldap::User;
@@ -182,14 +182,14 @@ impl TryFrom<ResultEntry> for User {
             .attrs
             .get("jpegPhoto")
             .map(|v| v.iter().map(|s| s.as_bytes().to_vec()).collect::<Vec<_>>())
-            .or_else(|| entry.bin_attrs.get("jpegPhoto").map(Clone::clone))
+            .or_else(|| entry.bin_attrs.get("jpegPhoto").cloned())
             .and_then(|v| v.into_iter().next().filter(|s| !s.is_empty()));
         let password =
             get_optional_attribute("userPassword").or_else(|| get_optional_attribute("password"));
         Ok(User::new(
             crate::lldap::CreateUserInput {
                 id,
-                email,
+                email: Some(email),
                 display_name,
                 first_name,
                 last_name,
