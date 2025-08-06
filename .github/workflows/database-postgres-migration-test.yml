@@ -19,7 +19,7 @@ jobs:
 
     steps:
        - name: Download artifacts
-         uses: actions/download-artifact@v3
+         uses: actions/download-artifact@v5
          with:
            name: x86_64-unknown-linux-musl-lldap-bin
            path: bin/
