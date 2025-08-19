@@ -60,7 +60,7 @@ jobs:
       - name: Version Check
         uses: action-rs/cargo@v1
         with:
-          command: --version
+          args: --version
       - name: Run cargo clippy
         uses: actions-rs/cargo@v1
         with:
