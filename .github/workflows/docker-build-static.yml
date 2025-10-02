@@ -655,7 +655,7 @@ jobs:
 
       - name: Update repo description
         if: github.event_name != 'pull_request'
-        uses: peter-evans/dockerhub-description@v4
+        uses: peter-evans/dockerhub-description@v5
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -663,7 +663,7 @@ jobs:
 
       - name: Update lldap repo description
         if: github.event_name != 'pull_request'
-        uses: peter-evans/dockerhub-description@v4
+        uses: peter-evans/dockerhub-description@v5
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
